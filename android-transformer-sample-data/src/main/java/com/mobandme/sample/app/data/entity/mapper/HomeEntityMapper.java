@@ -23,31 +23,42 @@
  * Contact: Txus Ballesteros <txus.ballesteros@gmail.com>
  */
 
-package com.mobandme.android.transformer.internal;
+package com.mobandme.sample.app.data.entity.mapper;
 
-import java.util.Set;
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic;
+import com.mobandme.sample.app.data.entity.HomeEntity;
+import com.mobandme.sample.app.domain.Home;
 
-@SupportedSourceVersion(SourceVersion.RELEASE_7)
-@SupportedAnnotationTypes(
-        "com.mobandme.android.transformer.Mapping"
-)
-public class AnnotationsProcessor extends AbstractProcessor {
+public class HomeEntityMapper {
     
-    @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        writeTrace("Processing android transformer annotations.");
-
-        return true;
+    public Home transform(HomeEntity entity) {
+        Home result = null;
+     
+        if (entity != null) {
+            result = new Home();
+            
+            result.Address = entity.Address;
+            result.City = entity.City;
+            result.PostalCode = entity.PostalCode;
+            result.Country = entity.Country;
+            
+        }
+        
+        return null;
     }
-    
-    private void writeTrace(String message) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, message);
+
+    public HomeEntity transform(Home entity) {
+        HomeEntity result = null;
+
+        if (entity != null) {
+            result = new HomeEntity();
+
+            result.Address = entity.Address;
+            result.City = entity.City;
+            result.PostalCode = entity.PostalCode;
+            result.Country = entity.Country;
+
+        }
+
+        return null;
     }
 }

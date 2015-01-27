@@ -25,9 +25,14 @@
 
 package com.mobandme.sample.app.data.entity;
 
+import com.mobandme.sample.app.domain.Home;
+import com.mobandme.android.transformer.Mapping;
+
 public class HomeEntity {
 
+    @Mapping(with = Home.class)
     public String Address;
+    
     public String City;
     public String PostalCode;
     public String Country;

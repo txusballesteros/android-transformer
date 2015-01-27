@@ -18,5 +18,6 @@ android {
 }
 
 dependencies {
+    compile project(':android-transformer')
     compile project(':android-transformer-sample-domain')
 }
