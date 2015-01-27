@@ -26,25 +26,68 @@
 package com.mobandme.android.transformer.internal;
 
 import java.util.Set;
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.TypeElement;
+
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.VariableElement;
 import javax.tools.Diagnostic;
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.PackageElement;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.AbstractProcessor;
+
+import com.mobandme.android.transformer.Mapping;
+import com.mobandme.android.transformer.Mappable;
+import javax.annotation.processing.SupportedSourceVersion;
+import javax.annotation.processing.SupportedAnnotationTypes;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
-@SupportedAnnotationTypes(
-        "com.mobandme.android.transformer.Mapping"
-)
+@SupportedAnnotationTypes({
+    "com.mobandme.android.transformer.Mapping",
+    "com.mobandme.android.transformer.Mappable"
+})
 public class AnnotationsProcessor extends AbstractProcessor {
     
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         writeTrace("Processing android transformer annotations.");
 
+        processMappableElements(roundEnv);
+
+        processMappingElements(roundEnv);
+        
         return true;
+    }
+    
+    private void processMappableElements(RoundEnvironment roundEnv) {
+        for (Element mappableElement : roundEnv.getElementsAnnotatedWith(Mappable.class)) {
+            if (mappableElement.getKind() == ElementKind.CLASS) {
+                TypeElement classElement = (TypeElement)mappableElement;
+                PackageElement packageElement = (PackageElement)classElement.getEnclosingElement();
+                
+                Mappable mappableAnnotation = mappableElement.getAnnotation(Mappable.class);
+
+                String withName = mappableAnnotation.with().toString();
+                String className = classElement.getSimpleName().toString();
+                String packageName = packageElement.getQualifiedName().toString();
+                        
+                writeTrace(String.format("\tProcessing class %s.%s linked to %s", packageName, className, withName));
+            }
+        }
+    }
+    
+    private void processMappingElements(RoundEnvironment roundEnv) {
+        for (Element mappingElement : roundEnv.getElementsAnnotatedWith(Mapping.class)) {
+            if (mappingElement.getKind() == ElementKind.FIELD) {
+                VariableElement variableElement = (VariableElement)mappingElement;
+                String fieldName = mappingElement.getSimpleName().toString();
+                String fieldTypeName = variableElement.asType().toString();
+
+                writeTrace(String.format("\t\tProcessing field %s, %s", fieldName, fieldTypeName));
+            }
+        }
     }
     
     private void writeTrace(String message) {

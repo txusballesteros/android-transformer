@@ -30,12 +30,6 @@ import java.lang.annotation.RetentionPolicy;
 public @interface Mapping {
 
     /**
-     * Use this property to establish the destination object class.
-     * @return
-     */
-    public Class<?> with();
-
-    /**
      * Use this property to establish a specific field name, for example, if the two fields does not have the same name.
      * @return
      */

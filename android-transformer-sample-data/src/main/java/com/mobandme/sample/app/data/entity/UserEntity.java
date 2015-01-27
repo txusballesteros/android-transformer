@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright Txus Ballesteros 2015 (@txusballesteros)
  *
  * This file is part of some open source application.
@@ -23,20 +23,21 @@
  * Contact: Txus Ballesteros <txus.ballesteros@gmail.com>
  */
 
-package com.mobandme.sample.app.model;
+package com.mobandme.sample.app.data.entity;
 
 import com.mobandme.android.transformer.Mappable;
-import com.mobandme.sample.app.domain.Home;
 import com.mobandme.android.transformer.Mapping;
+import com.mobandme.sample.app.domain.User;
 
-@Mappable( with = Home.class )
-public class HomeModel {
+import java.util.Calendar;
+
+@Mappable( with = User.class )
+public class UserEntity {
     
     @Mapping
-    public String Address;
-    
-    public String City;
-    public String PostalCode;
-    public String Country;
+    public String Name;
+    public String Surname;
+    public Calendar BirthOfDate;
+    public String Email;
     
 }

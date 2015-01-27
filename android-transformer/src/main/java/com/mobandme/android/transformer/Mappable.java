@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright Txus Ballesteros 2015 (@txusballesteros)
  *
  * This file is part of some open source application.
@@ -23,20 +23,15 @@
  * Contact: Txus Ballesteros <txus.ballesteros@gmail.com>
  */
 
-package com.mobandme.sample.app.model;
+package com.mobandme.android.transformer;
 
-import com.mobandme.android.transformer.Mappable;
-import com.mobandme.sample.app.domain.Home;
-import com.mobandme.android.transformer.Mapping;
+/**
+ * Use this annotation to configure you mappable objects.
+ */
+public @interface Mappable {
 
-@Mappable( with = Home.class )
-public class HomeModel {
-    
-    @Mapping
-    public String Address;
-    
-    public String City;
-    public String PostalCode;
-    public String Country;
-    
+    /**
+     * Use this property to establish the linked object type.
+     */
+    Class<?> with();
 }

@@ -25,12 +25,14 @@
 
 package com.mobandme.sample.app.data.entity;
 
+import com.mobandme.android.transformer.Mappable;
 import com.mobandme.sample.app.domain.Home;
 import com.mobandme.android.transformer.Mapping;
 
+@Mappable( with = Home.class )
 public class HomeEntity {
 
-    @Mapping(with = Home.class)
+    @Mapping
     public String Address;
     
     public String City;
