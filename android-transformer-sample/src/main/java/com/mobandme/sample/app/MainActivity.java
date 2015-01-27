@@ -23,30 +23,18 @@
  * Contact: Txus Ballesteros <txus.ballesteros@gmail.com>
  */
 
-package com.mobandme.android.transformer.internal;
+package com.mobandme.sample.app;
 
-import java.util.Set;
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic;
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 
-@SupportedSourceVersion(SourceVersion.RELEASE_7)
-@SupportedAnnotationTypes(
-        "com.mobandme.android.transformer.Mapping"
-)
-public class AnnotationsProcessor extends AbstractProcessor {
-    
+public class MainActivity extends Activity {
+
     @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        writeTrace("Processing android transformer annotations.");
-        return true;
-    }
-    
-    private void writeTrace(String message) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, message);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
     }
 }

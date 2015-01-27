@@ -1,5 +1,15 @@
-apply plugin: 'java'
-
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+buildscript {
+    repositories {
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jimdo.gradle:gradle-apt-plugin:0.5-SNAPSHOT'
+        classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:1.12.+'
+    }
 }
+
+apply plugin: 'java'
+apply plugin: 'apt'

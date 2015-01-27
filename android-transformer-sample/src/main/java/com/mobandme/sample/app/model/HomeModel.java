@@ -23,30 +23,18 @@
  * Contact: Txus Ballesteros <txus.ballesteros@gmail.com>
  */
 
-package com.mobandme.android.transformer.internal;
+package com.mobandme.sample.app.model;
 
-import java.util.Set;
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic;
+import com.mobandme.sample.app.domain.Home;
+import com.mobandme.android.transformer.Mapping;
 
-@SupportedSourceVersion(SourceVersion.RELEASE_7)
-@SupportedAnnotationTypes(
-        "com.mobandme.android.transformer.Mapping"
-)
-public class AnnotationsProcessor extends AbstractProcessor {
+public class HomeModel {
     
-    @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        writeTrace("Processing android transformer annotations.");
-        return true;
-    }
+    @Mapping(with = Home.class)
+    public String Address;
     
-    private void writeTrace(String message) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, message);
-    }
+    public String City;
+    public String PostalCode;
+    public String Country;
+    
 }
