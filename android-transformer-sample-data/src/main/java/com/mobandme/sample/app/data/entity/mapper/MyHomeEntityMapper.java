@@ -28,7 +28,24 @@ package com.mobandme.sample.app.data.entity.mapper;
 import com.mobandme.sample.app.data.entity.HomeEntity;
 import com.mobandme.sample.app.domain.Home;
 
-public class HomeEntityMapper {
+import java.util.ArrayList;
+import java.util.Collection;
+
+public class MyHomeEntityMapper {
+
+    public Collection<Home> transform(Collection<HomeEntity> homeEntityCollection) {
+        Collection<Home> homeList = new ArrayList<Home>();
+
+        Home home;
+        for (HomeEntity homeEntity : homeEntityCollection) {
+            home = transform(homeEntity);
+            if (home != null)
+                homeList.add(home);
+
+        }
+
+        return homeList;
+    }
     
     public Home transform(HomeEntity entity) {
         Home result = null;

@@ -25,6 +25,8 @@
 
 package com.mobandme.android.transformer.internal;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -49,6 +51,9 @@ import com.mobandme.android.transformer.Mapping;
 import com.mobandme.android.transformer.Mappable;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.tools.FileObject;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardLocation;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes({
@@ -57,6 +62,13 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 })
 public class AnnotationsProcessor extends AbstractProcessor {
 
+    private final static String PACKAGE_PATTERN = "package %s;";
+    private final static String CLASS_PATTERN = "public class %s {";
+    private final static String MAPPER_PACKAGE_PATTERN = "%s.mapper";
+    private final static String IMPORT_PATTERN = "import %s.%s;";
+    private final static String MAPPER_CLASS_NAME_PATTERN = "%sMapper";
+    private final static String MAPPER_FIELD_PATTERN = "result.%s = data.%s;";
+    
     RoundEnvironment roundEnvironment;
     Map<String, MapperInfo> mappersList;
     
@@ -71,7 +83,124 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
         processMappingAnnotationElements();
 
+        buildMappers();
+        
         return true;
+    }
+    
+    private void buildMappers() {
+        for (MapperInfo mapper : this.mappersList.values()) {
+            Collection<String> mapperImports = new ArrayList<>();
+            Collection<String> directFields = new ArrayList<>();
+            Collection<String> inverseFields = new ArrayList<>();
+            
+            String mapperPackage = String.format(MAPPER_PACKAGE_PATTERN, mapper.packageName);
+            String mapperClassName = String.format(MAPPER_CLASS_NAME_PATTERN, mapper.className);
+
+            mapperImports.add("import java.util.ArrayList;");
+            mapperImports.add("import java.util.Collection;");
+            mapperImports.add(String.format(IMPORT_PATTERN, mapper.packageName, mapper.className));
+            mapperImports.add(String.format(IMPORT_PATTERN, mapper.linkedPackageName, mapper.linkedClassName));
+
+            writeTrace(String.format("Building mapper %s.%s", mapperPackage, mapperClassName));
+            
+            for (MapperFieldInfo mapperField : mapper.getFields()) {
+                String originFieldName = mapperField.fieldName;
+                String destinationFieldName = mapperField.fieldName;
+                
+                if (mapperField.withFieldName != null && !mapperField.withFieldName.trim().equals(""))
+                    destinationFieldName = mapperField.withFieldName;
+                
+                directFields.add(String.format(MAPPER_FIELD_PATTERN, originFieldName, destinationFieldName));
+                inverseFields.add(String.format(MAPPER_FIELD_PATTERN, destinationFieldName, originFieldName));
+            }
+
+            generateMapperJavaFile(mapper, mapperPackage, mapperClassName, mapperImports, directFields, inverseFields);
+        }
+    }
+    
+    private void generateMapperJavaFile(MapperInfo mapper, String packageName, String className, Collection<String> imports, Collection<String> directFields, Collection<String> inversFields) {
+        writeTrace(String.format("Generating source file for mapper %s.%s", packageName, className));
+
+        try {
+
+            JavaFileObject javaFileObject = processingEnv.getFiler().createSourceFile(className);
+            BufferedWriter buffer = new BufferedWriter(javaFileObject.openWriter());
+            
+            buffer.append(String.format(PACKAGE_PATTERN, packageName));
+            buffer.newLine();
+            
+            for (String classImport : imports) {
+                buffer.newLine();
+                buffer.append(classImport);
+            }
+
+            buffer.newLine();
+            buffer.newLine();
+            buffer.append(String.format(CLASS_PATTERN, className));
+
+            generateTransformListMethod(buffer, mapper.className, mapper.linkedClassName);
+            //generateTransformListMethod(buffer, mapper.linkedClassName, mapper.className);
+            generateTransformMethod(buffer, mapper.className, mapper.linkedClassName, directFields);
+            generateTransformMethod(buffer, mapper.linkedClassName, mapper.className, inversFields);
+
+            buffer.newLine();
+            buffer.append("}");
+            buffer.close();
+            
+        } catch (IOException error) {
+            throw new RuntimeException(error);
+        }
+    }
+
+    private void generateTransformListMethod(BufferedWriter buffer, String className, String linkedClassName) throws IOException {
+        buffer.newLine();
+        buffer.newLine();
+        buffer.append(String.format("\tpublic Collection<%s> transform(Collection<%s> data) {", linkedClassName, className));
+        buffer.newLine();
+        buffer.append(String.format("\t\tCollection<%s> result = new ArrayList<%s>();", linkedClassName, linkedClassName));
+        buffer.newLine();
+        buffer.newLine();
+        buffer.append(String.format("\t\tfor (%s element : data) {", className));
+        buffer.newLine();
+        buffer.append(String.format("\t\t\t%s transformedElement = transform(element);", linkedClassName));
+        buffer.newLine();
+        buffer.append("\t\t\tif (transformedElement != null)");
+        buffer.newLine();
+        buffer.append("\t\t\t\tresult.add(transformedElement);");
+
+        buffer.newLine();
+        buffer.append("\t\t}");
+        buffer.newLine();
+        buffer.newLine();
+        buffer.append("\t\treturn result;");
+        buffer.newLine();
+        buffer.append("\t}");
+    }
+    
+    private void generateTransformMethod(BufferedWriter buffer, String className, String linkedClassName, Collection<String> fields) throws IOException {
+        buffer.newLine();
+        buffer.newLine();
+        buffer.append(String.format("\tpublic %s transform(%s data) {", linkedClassName, className));
+        buffer.newLine();
+        buffer.append(String.format("\t\t%s result = null;", linkedClassName));
+
+        buffer.newLine();
+        buffer.newLine();
+        buffer.append("\t\tif (data != null) {");
+        
+        for(String field : fields) {
+            buffer.newLine();
+            buffer.append(String.format("\t\t\t%s", field));
+        }
+
+        buffer.newLine();
+        buffer.append("\t\t}");
+        buffer.newLine();
+        buffer.newLine();
+        buffer.append("\t\treturn result;");
+        buffer.newLine();
+        buffer.append("\t}");
     }
     
     private void processMappableAnnotationElements() {
@@ -97,11 +226,18 @@ public class AnnotationsProcessor extends AbstractProcessor {
         for (Element mappingElement : roundEnvironment.getElementsAnnotatedWith(Mapping.class)) {
             if (mappingElement.getKind() == ElementKind.FIELD) {
                 Mapping mappingAnnotation = mappingElement.getAnnotation(Mapping.class);
-                
+
                 String fieldName = mappingElement.getSimpleName().toString();
-                String linkToFieldName = mappingAnnotation.withFieldName();
+                String withFieldName = mappingAnnotation.withFieldName();
                 
-                writeTrace(String.format("\t\tProcessing field %s linked to %s", fieldName, linkToFieldName));
+                MapperFieldInfo mappingFieldInfo = new MapperFieldInfo(fieldName, withFieldName);
+                
+                ClassInfo classInfo = extractClassInformationFromField(mappingElement);
+                getMapper(classInfo)
+                        .getFields()
+                            .add(mappingFieldInfo);
+                
+                writeTrace(String.format("\t\tProcessing field %s.%s linked to %s", classInfo.getFullName(), fieldName, withFieldName));
             }
         }
     }
@@ -121,6 +257,11 @@ public class AnnotationsProcessor extends AbstractProcessor {
     private MapperInfo getMapper(ClassInfo classInfo) {
         MapperInfo result = mappersList.get(classInfo.getFullName());
         return result;
+    }
+    
+    private ClassInfo extractClassInformationFromField(Element element) {
+        Element classElement = element.getEnclosingElement();
+        return extractClassInformation(classElement);
     }
     
     private ClassInfo extractClassInformation(Element element) {
@@ -201,7 +342,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
         private List<MapperFieldInfo> mappingsList = new ArrayList<>();
         
-        public List<MapperFieldInfo> getMappings() { return mappingsList; }
+        public List<MapperFieldInfo> getFields() { return mappingsList; }
         
         public MapperInfo(String packageName, String className, String linkedPackageName, String linkedClassName) {
             super(packageName, className);
@@ -212,6 +353,12 @@ public class AnnotationsProcessor extends AbstractProcessor {
     }
     
     private class MapperFieldInfo {
-         
+        public final String fieldName;
+        public final String withFieldName;
+        
+        public MapperFieldInfo(String fieldName, String withFieldName) {
+            this.fieldName = fieldName;
+            this.withFieldName = withFieldName;
+        }
     }
 }

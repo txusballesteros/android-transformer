@@ -32,7 +32,7 @@ import com.mobandme.android.transformer.Mapping;
 @Mappable( with = Home.class )
 public class HomeEntity {
 
-    @Mapping(withFieldName = "Address22")
+    @Mapping
     public String Address;
     
     public String City;

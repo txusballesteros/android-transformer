@@ -28,7 +28,7 @@ package com.mobandme.sample.app.model.mapper;
 import com.mobandme.sample.app.domain.Home;
 import com.mobandme.sample.app.model.HomeModel;
 
-public class HomeModelMapper {
+public class MyHomeModelMapper {
     
     public Home transform(HomeModel entity) {
         Home result = null;

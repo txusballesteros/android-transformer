@@ -30,6 +30,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.mobandme.sample.app.model.mapper.MyHomeModelMapper;
+
 public class MainActivity extends Activity {
 
     @Override
