@@ -188,6 +188,10 @@ public class AnnotationsProcessor extends AbstractProcessor {
         buffer.newLine();
         buffer.newLine();
         buffer.append("\t\tif (data != null) {");
+
+        buffer.newLine();
+        buffer.append(String.format("\t\t\tresult = new %s();", linkedClassName));
+        buffer.newLine();
         
         for(String field : fields) {
             buffer.newLine();

@@ -33,12 +33,12 @@ import java.util.Collection;
 
 public class MyHomeEntityMapper {
 
-    public Collection<Home> transform(Collection<HomeEntity> homeEntityCollection) {
-        Collection<Home> homeList = new ArrayList<Home>();
+    /*
+    public Collection<Object> transform(Collection<Object> homeModelCollection) {
+        Collection<HomeEntity> homeList = new ArrayList<HomeEntity>();
 
-        Home home;
-        for (HomeEntity homeEntity : homeEntityCollection) {
-            home = transform(homeEntity);
+        for (Object homeEntity : homeModelCollection) {
+            HomeEntity home = transform(homeEntity);
             if (home != null)
                 homeList.add(home);
 
@@ -46,6 +46,7 @@ public class MyHomeEntityMapper {
 
         return homeList;
     }
+    */
     
     public Home transform(HomeEntity entity) {
         Home result = null;
