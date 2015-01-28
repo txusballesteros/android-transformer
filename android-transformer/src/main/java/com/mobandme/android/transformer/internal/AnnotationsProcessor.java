@@ -25,21 +25,23 @@
 
 package com.mobandme.android.transformer.internal;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
+import javax.lang.model.util.Types;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.ExecutableElement;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.AbstractProcessor;
 
@@ -56,17 +58,19 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 public class AnnotationsProcessor extends AbstractProcessor {
 
     RoundEnvironment roundEnvironment;
-            
+    Map<String, MapperInfo> mappersList;
+    
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         roundEnvironment = roundEnv;
+        mappersList = new HashMap<>();
         
         writeTrace("Processing android transformer annotations.");
 
         processMappableAnnotationElements();
 
         processMappingAnnotationElements();
-        
+
         return true;
     }
     
@@ -78,28 +82,45 @@ public class AnnotationsProcessor extends AbstractProcessor {
                 AnnotationValue  annotationValue = getAnnotationValue(annotationMirror, "with");
                 TypeElement linkedElement = getTypeElement(annotationValue);
                 
-                ClassInfo classInfo = extractClassInformation(mappableElement);
+                ClassInfo mappableClassInfo = extractClassInformation(mappableElement);
                 ClassInfo linkedClassInfo = extractClassInformation(linkedElement);
 
-                writeTrace(String.format("\tProcessing class %s.%s linked to %s.%s", classInfo.classPackage, classInfo.className, linkedClassInfo.classPackage, linkedClassInfo.className));
+                if (!haveMapper(mappableClassInfo))
+                    createMapper(mappableClassInfo, linkedClassInfo);
+                
+                writeTrace(String.format("\tProcessing class %s.%s linked to %s.%s", mappableClassInfo.packageName, mappableClassInfo.className, linkedClassInfo.packageName, linkedClassInfo.className));
             }
         }
     }
-    
+
     private void processMappingAnnotationElements() {
         for (Element mappingElement : roundEnvironment.getElementsAnnotatedWith(Mapping.class)) {
             if (mappingElement.getKind() == ElementKind.FIELD) {
-                VariableElement variableElement = (VariableElement)mappingElement;
-                
-                Mapping mappingAnnotation = variableElement.getAnnotation(Mapping.class);
+                Mapping mappingAnnotation = mappingElement.getAnnotation(Mapping.class);
                 
                 String fieldName = mappingElement.getSimpleName().toString();
-                String fieldTypeName = variableElement.asType().toString();
                 String linkToFieldName = mappingAnnotation.withFieldName();
                 
-                writeTrace(String.format("\t\tProcessing field %s, %s linked to %s", fieldName, fieldTypeName, linkToFieldName));
+                writeTrace(String.format("\t\tProcessing field %s linked to %s", fieldName, linkToFieldName));
             }
         }
+    }
+
+    private boolean haveMapper(ClassInfo classInfo) {
+        String mapperClassFullName = classInfo.getFullName();
+        boolean result = mappersList.containsKey(mapperClassFullName);
+        return result;
+    }
+
+    private MapperInfo createMapper(ClassInfo classInfo, ClassInfo linkedClassInfo) {
+        MapperInfo mapper = new MapperInfo(classInfo.packageName, classInfo.className, linkedClassInfo.packageName, linkedClassInfo.className);
+        mappersList.put(mapper.getFullName(), mapper);
+        return mapper;
+    }
+
+    private MapperInfo getMapper(ClassInfo classInfo) {
+        MapperInfo result = mappersList.get(classInfo.getFullName());
+        return result;
     }
     
     private ClassInfo extractClassInformation(Element element) {
@@ -155,12 +176,42 @@ public class AnnotationsProcessor extends AbstractProcessor {
     }
     
     private class ClassInfo {
-        String classPackage;
-        String className;
+        public final String className;
+        public final String packageName;
         
-        public ClassInfo(String pacakge, String name) {
-            classPackage = pacakge;
-            className = name;
+        public ClassInfo(String packageName, String className) {
+            this.packageName = packageName;
+            this.className = className;
         }
+
+        public String getFullName() {
+            return String.format("%s.%s", packageName, className);
+        }
+        
+        @Override
+        public String toString() {
+            return String.format("%s.%s", packageName, className);
+        }
+    }
+    
+    private class MapperInfo extends ClassInfo {
+        
+        public final String linkedClassName;
+        public final String linkedPackageName;
+
+        private List<MapperFieldInfo> mappingsList = new ArrayList<>();
+        
+        public List<MapperFieldInfo> getMappings() { return mappingsList; }
+        
+        public MapperInfo(String packageName, String className, String linkedPackageName, String linkedClassName) {
+            super(packageName, className);
+            
+            this.linkedPackageName = linkedPackageName;
+            this.linkedClassName = linkedClassName;
+        }
+    }
+    
+    private class MapperFieldInfo {
+         
     }
 }

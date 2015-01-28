@@ -13,3 +13,6 @@ buildscript {
 
 apply plugin: 'java'
 apply plugin: 'apt'
+
+dependencies {
+}
