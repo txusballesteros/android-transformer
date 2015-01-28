@@ -25,15 +25,16 @@
 
 package com.mobandme.android.transformer.internal;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.io.IOException;
+import java.util.Collection;
+import java.io.BufferedWriter;
 import javax.tools.Diagnostic;
+import javax.tools.JavaFileObject;
 import javax.lang.model.util.Types;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.type.TypeMirror;
@@ -51,9 +52,7 @@ import com.mobandme.android.transformer.Mapping;
 import com.mobandme.android.transformer.Mappable;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.tools.FileObject;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardLocation;
+
 
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes({
