@@ -25,10 +25,15 @@
 
 package com.mobandme.android.transformer.internal;
 
+import java.util.Map;
 import java.util.Set;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -49,48 +54,113 @@ import javax.annotation.processing.SupportedAnnotationTypes;
     "com.mobandme.android.transformer.Mappable"
 })
 public class AnnotationsProcessor extends AbstractProcessor {
-    
+
+    RoundEnvironment roundEnvironment;
+            
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        roundEnvironment = roundEnv;
+        
         writeTrace("Processing android transformer annotations.");
 
-        processMappableElements(roundEnv);
+        processMappableAnnotationElements();
 
-        processMappingElements(roundEnv);
+        processMappingAnnotationElements();
         
         return true;
     }
     
-    private void processMappableElements(RoundEnvironment roundEnv) {
-        for (Element mappableElement : roundEnv.getElementsAnnotatedWith(Mappable.class)) {
+    private void processMappableAnnotationElements() {
+        for (Element mappableElement : roundEnvironment.getElementsAnnotatedWith(Mappable.class)) {
             if (mappableElement.getKind() == ElementKind.CLASS) {
-                TypeElement classElement = (TypeElement)mappableElement;
-                PackageElement packageElement = (PackageElement)classElement.getEnclosingElement();
-                
-                Mappable mappableAnnotation = mappableElement.getAnnotation(Mappable.class);
 
-                String withName = mappableAnnotation.with().toString();
-                String className = classElement.getSimpleName().toString();
-                String packageName = packageElement.getQualifiedName().toString();
-                        
-                writeTrace(String.format("\tProcessing class %s.%s linked to %s", packageName, className, withName));
+                AnnotationMirror annotationMirror = getAnnotationMirror(mappableElement, Mappable.class);
+                AnnotationValue  annotationValue = getAnnotationValue(annotationMirror, "with");
+                TypeElement linkedElement = getTypeElement(annotationValue);
+                
+                ClassInfo classInfo = extractClassInformation(mappableElement);
+                ClassInfo linkedClassInfo = extractClassInformation(linkedElement);
+
+                writeTrace(String.format("\tProcessing class %s.%s linked to %s.%s", classInfo.classPackage, classInfo.className, linkedClassInfo.classPackage, linkedClassInfo.className));
             }
         }
     }
     
-    private void processMappingElements(RoundEnvironment roundEnv) {
-        for (Element mappingElement : roundEnv.getElementsAnnotatedWith(Mapping.class)) {
+    private void processMappingAnnotationElements() {
+        for (Element mappingElement : roundEnvironment.getElementsAnnotatedWith(Mapping.class)) {
             if (mappingElement.getKind() == ElementKind.FIELD) {
                 VariableElement variableElement = (VariableElement)mappingElement;
+                
+                Mapping mappingAnnotation = variableElement.getAnnotation(Mapping.class);
+                
                 String fieldName = mappingElement.getSimpleName().toString();
                 String fieldTypeName = variableElement.asType().toString();
-
-                writeTrace(String.format("\t\tProcessing field %s, %s", fieldName, fieldTypeName));
+                String linkToFieldName = mappingAnnotation.withFieldName();
+                
+                writeTrace(String.format("\t\tProcessing field %s, %s linked to %s", fieldName, fieldTypeName, linkToFieldName));
             }
         }
+    }
+    
+    private ClassInfo extractClassInformation(Element element) {
+        PackageElement packageElement = (PackageElement)element.getEnclosingElement();
+        String className = element.getSimpleName().toString();
+        String packageName = packageElement.getQualifiedName().toString();
+        
+        return new ClassInfo(packageName, className);
+    }
+    
+    private AnnotationMirror getAnnotationMirror(Element element, Class<?> annotationType) {
+        AnnotationMirror result = null;
+        
+        String annotationClassName = annotationType.getName();
+        for(AnnotationMirror mirror : element.getAnnotationMirrors()) {
+            if(mirror.getAnnotationType().toString().equals(annotationClassName)) {
+                result = mirror;
+                break;
+            }
+        }
+        
+        return result;
+    }
+    
+    private AnnotationValue getAnnotationValue(AnnotationMirror annotation, String field) {
+        AnnotationValue result = null;
+
+        if (annotation != null) {
+            for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : annotation.getElementValues().entrySet()) {
+                if (entry.getKey().getSimpleName().toString().equals(field)) {
+                    return entry.getValue();
+                }
+            }
+        }
+        
+        return result;
+    }
+
+    private TypeElement getTypeElement(AnnotationValue value) {
+        TypeElement result = null;
+        
+        if (value != null) {
+            TypeMirror typeMirror = (TypeMirror)value.getValue();
+            Types TypeUtils = processingEnv.getTypeUtils();
+            result = (TypeElement)TypeUtils.asElement(typeMirror);
+        }
+        
+        return result;
     }
     
     private void writeTrace(String message) {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, message);
+    }
+    
+    private class ClassInfo {
+        String classPackage;
+        String className;
+        
+        public ClassInfo(String pacakge, String name) {
+            classPackage = pacakge;
+            className = name;
+        }
     }
 }
