@@ -46,6 +46,9 @@ public class MainActivity extends Activity {
 
         try {
 
+            Transformer homeModelTransformer = new Transformer
+                                                        .Builder()
+                                                            .build(HomeModel.class);
             Home home = null;
             HomeModel homeModel = new HomeModel();
             homeModel.Address = "My Street, 65, 3";
@@ -53,8 +56,8 @@ public class MainActivity extends Activity {
             homeModel.Country = "Spain";
             homeModel.PostalCode = "48903";
 
-            home = (Home)Transformer.transform(homeModel);
-            homeModel = (HomeModel)Transformer.transform(home);
+            home = (Home)homeModelTransformer.transform(homeModel);
+            homeModel = (HomeModel)homeModelTransformer.transform(home);
             
             Toast.makeText(this, String.format("Transformed %s --> %s", homeModel.getClass().getSimpleName(), home.getClass().getSimpleName()), Toast.LENGTH_SHORT).show();
             

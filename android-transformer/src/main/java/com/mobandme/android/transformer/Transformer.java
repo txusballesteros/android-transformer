@@ -33,8 +33,23 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public final class Transformer {
-
-    public static Object transform(Object value) {
+    public static class Builder {
+        
+        public Transformer build(Class<?> type) {
+            if (type == null)
+                throw new IllegalArgumentException("The 'type' parameter cannot be null.");
+            
+            return new Transformer(type);
+        }
+    }
+    
+    private Class<?> transformerType;
+    
+    private Transformer(Class<?> type) {
+        this.transformerType = type;
+    }
+    
+    public Object transform(Object value) {
         Object result = null;
         
         try {
@@ -43,10 +58,10 @@ public final class Transformer {
             if (value == null)
                 throw new IllegalArgumentException("The 'value' parameter cannot be null.");
 
-            String transformerCanonicalName = getTransformerCanonicalName(value);
+            String transformerCanonicalName = getTransformerCanonicalName();
             AbstractTransformer transformer = getTransformerInstance(transformerCanonicalName);
-            Object mapperIntance = getMapperInstance(transformer, value);
-            result = executeTransformation(mapperIntance, value);
+            Object mapperInstance = getMapperInstance(transformer, value);
+            result = executeTransformation(mapperInstance, value);
             
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -55,17 +70,17 @@ public final class Transformer {
         return result;
     }
     
-    private static String getTransformerCanonicalName(Object value) {
+    private String getTransformerCanonicalName() {
         String result;
         
-        String packageName = String.format(Tools.TRANSFORMER_PACKAGE_PATTERN, value.getClass().getPackage().getName());
+        String packageName = String.format(Tools.TRANSFORMER_PACKAGE_PATTERN, transformerType.getPackage().getName());
         String className = Tools.TRANSFORMER_CLASS_NAME;
         result = String.format("%s.%s", packageName, className);
         
         return result;
     }
     
-    private static AbstractTransformer getTransformerInstance(String transformerCanonicalName) {
+    private AbstractTransformer getTransformerInstance(String transformerCanonicalName) {
         AbstractTransformer result = null;
         
         try {
@@ -81,12 +96,12 @@ public final class Transformer {
         return result;
     }
     
-    private static Object getMapperInstance(AbstractTransformer transformer, Object value) {
+    private Object getMapperInstance(AbstractTransformer transformer, Object value) {
         Object result = transformer.getMapper(value);
         return result;
     }
     
-    private static Object executeTransformation(Object mapper, Object value) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    private Object executeTransformation(Object mapper, Object value) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Object result = null;
         Method transforMethod = mapper.getClass().getMethod("transform", value.getClass());
         if (transforMethod != null)
