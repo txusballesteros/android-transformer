@@ -43,34 +43,23 @@ public class MainActivity extends Activity {
 
         try {
 
-            Home home = null;
-            
-            Transformer homeEntityTransformer = new Transformer
-                                                        .Builder()
-                                                            .build(HomeEntity.class);
-
             Transformer homeModelTransformer = new Transformer
                                                         .Builder()
                                                             .build(HomeModel.class);
-            
-            HomeEntity homeEntity = new HomeEntity();
-            homeEntity.Address = "My Street, 65, 3";
-            homeEntity.City = "Bilbao";
-            homeEntity.Country = "Spain";
-            homeEntity.PostalCode = "48903";
 
+            Transformer homeEntityTransformer = new Transformer
+                                                        .Builder()
+                                                            .build(HomeEntity.class);
+            
             HomeModel homeModel = new HomeModel();
             homeModel.Address = "My Street, 65, 3";
             homeModel.City = "Bilbao";
             homeModel.Country = "Spain";
             homeModel.PostalCode = "48903";
             
-            home = (Home)homeEntityTransformer.transform(homeEntity);
-            homeEntity = (HomeEntity)homeEntityTransformer.transform(home);
-                    
-            home = (Home)homeModelTransformer.transform(homeModel);
-            homeModel = (HomeModel)homeModelTransformer.transform(home);
-            
+            Home home = (Home)homeModelTransformer.transform(homeModel);
+            HomeEntity homeEntity = (HomeEntity)homeEntityTransformer.transform(home);
+
             Toast.makeText(this, String.format("Transformed %s --> %s", homeModel.getClass().getSimpleName(), home.getClass().getSimpleName()), Toast.LENGTH_SHORT).show();
             
         } catch (Exception e) {

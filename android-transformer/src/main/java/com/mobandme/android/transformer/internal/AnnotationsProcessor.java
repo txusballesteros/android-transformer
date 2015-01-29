@@ -48,7 +48,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.AbstractProcessor;
 
-import com.mobandme.android.transformer.Mapping;
+import com.mobandme.android.transformer.Mapped;
 import com.mobandme.android.transformer.Mappable;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.annotation.processing.SupportedAnnotationTypes;
@@ -258,14 +258,14 @@ public class AnnotationsProcessor extends AbstractProcessor {
     }
 
     private void processMappingAnnotationElements() {
-        for (Element mappingElement : roundEnvironment.getElementsAnnotatedWith(Mapping.class)) {
+        for (Element mappingElement : roundEnvironment.getElementsAnnotatedWith(Mapped.class)) {
             if (mappingElement.getKind() == ElementKind.FIELD) {
-                Mapping mappingAnnotation = mappingElement.getAnnotation(Mapping.class);
+                Mapped mappingAnnotation = mappingElement.getAnnotation(Mapped.class);
 
                 String fieldName = mappingElement.getSimpleName().toString();
-                String withFieldName = mappingAnnotation.withFieldName();
+                String toFieldName = mappingAnnotation.toField();
                 
-                MapperFieldInfo mappingFieldInfo = new MapperFieldInfo(fieldName, withFieldName);
+                MapperFieldInfo mappingFieldInfo = new MapperFieldInfo(fieldName, toFieldName);
                 
                 ClassInfo classInfo = extractClassInformationFromField(mappingElement);
                 getMapper(classInfo)

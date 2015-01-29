@@ -26,18 +26,21 @@
 package com.mobandme.sample.app.model;
 
 import com.mobandme.android.transformer.Mappable;
+import com.mobandme.android.transformer.Mapped;
 import com.mobandme.sample.app.domain.Home;
-import com.mobandme.android.transformer.Mapping;
 
 @Mappable( with = Home.class )
 public class HomeModel {
     
-    @Mapping(withFieldName = "PostalAddress") public String Address;
+    @Mapped(toField = "PostalAddress") public String Address;
     
-    @Mapping public String City;
+    @Mapped
+    public String City;
     
-    @Mapping public String PostalCode;
+    @Mapped
+    public String PostalCode;
     
-    @Mapping  public String Country;
+    @Mapped
+    public String Country;
     
 }

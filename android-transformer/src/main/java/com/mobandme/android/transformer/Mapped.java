@@ -27,11 +27,11 @@ import java.lang.annotation.RetentionPolicy;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Mapping {
+public @interface Mapped {
 
     /**
      * Use this property to establish a specific field name, for example, if the two fields does not have the same name.
      * @return
      */
-    public String withFieldName() default "";
+    public String toField() default "";
 }
