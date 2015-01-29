@@ -32,7 +32,7 @@ bintray {
     configurations = ['archives']
     pkg {
         repo = "maven"
-        name = "android-binding"
+        name = "android-transformer"
         websiteUrl = siteUrl
         vcsUrl = gitUrl
         licenses = ["Apache-2.0"]
