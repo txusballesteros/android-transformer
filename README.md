@@ -10,13 +10,18 @@ Android Transformer It's Java library to manage your object transformations betw
 
 ## How to use
 
+Add the library dependency to your build.gradle file.
 ```java
 dependencies {
     ...
     compile 'com.mobandme:android-transformer:1.0.0'
 }
 ```
-Add the library dependency to your build.gradle file.
+
+Use @Mappable annotation on your class definitions and @Mapped on the fields that you want map to the destination object. See that you destination object type
+is defined by the 'with' configuration on @Mappable annotation.
+
+IMPORTANT, You don't need configure nothing on your destination classes because the library made this job to you.
 
 ```java
 @Mappable( with = Home.class )
@@ -42,11 +47,7 @@ class Home {
     ...
 }
 ```
-
-Use @Mappable annotation on your class definitions and @Mapped on the fields that you want map to the destination object. See that you destination object type
-is defined by the 'with' configuration on @Mappable annotation.
-
-IMPORTANT, You don't need configure nothing on your destination classes because the library made this job to you.
+And now you will can make your object conversion.
 
 ```java
 public class MainActivity extends Activity {
@@ -71,7 +72,6 @@ public class MainActivity extends Activity {
     }
 }
 ```
-And now you will can make your object conversion.
 
 ## License
 
