@@ -61,15 +61,6 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 })
 public class AnnotationsProcessor extends AbstractProcessor {
 
-    private final static String PACKAGE_PATTERN = "package %s;";
-    private final static String CLASS_PATTERN = "public class %s {";
-    private final static String TRANSFORMER_PACKAGE_PATTERN = "%s.transformer";
-    private final static String TRANSFORMER_CLASS_PATTERN = "public class %s extends AbstractTransformer {";
-    private final static String IMPORT_PATTERN = "import %s.%s;";
-    private final static String MAPPER_PACKAGE_PATTERN = "%s.mapper";
-    private final static String MAPPER_CLASS_NAME_PATTERN = "%sMapper";
-    private final static String MAPPER_FIELD_PATTERN = "result.%s = data.%s;";
-    
     RoundEnvironment roundEnvironment;
     Map<String, MapperInfo> mappersList;
     
@@ -97,25 +88,25 @@ public class AnnotationsProcessor extends AbstractProcessor {
             if (mappersList.size() > 0) {
                 MapperInfo firstMapper = (MapperInfo)mappersList.values().toArray()[0];
                 
-                String packageName = String.format(TRANSFORMER_PACKAGE_PATTERN, firstMapper.packageName);
-                String className = "Transformer";
+                String packageName = String.format(Tools.TRANSFORMER_PACKAGE_PATTERN, firstMapper.packageName);
+                String className = Tools.TRANSFORMER_CLASS_NAME;
 
                 writeTrace(String.format("Generating source file for Transformer class with name %s.%s", packageName, className));
 
                 JavaFileObject javaFileObject = processingEnv.getFiler().createSourceFile(className);
                 BufferedWriter buffer = new BufferedWriter(javaFileObject.openWriter());
 
-                buffer.append(String.format(PACKAGE_PATTERN, packageName));
+                buffer.append(String.format(Tools.PACKAGE_PATTERN, packageName));
                 buffer.newLine();
 
                 //region "Class Imports Generation"
 
                 buffer.newLine();
-                buffer.append(String.format(IMPORT_PATTERN, "com.mobandme.android.transformer.internal", "AbstractTransformer"));
+                buffer.append(String.format(Tools.IMPORT_PATTERN, "com.mobandme.android.transformer.internal", "AbstractTransformer"));
                 for (MapperInfo mapper : mappersList.values()) {
 
                     buffer.newLine();
-                    buffer.append(String.format(IMPORT_PATTERN, mapper.mapperPackageName, mapper.mapperClassName));
+                    buffer.append(String.format(Tools.IMPORT_PATTERN, mapper.mapperPackageName, mapper.mapperClassName));
                 }
 
                 //endregion
@@ -124,10 +115,9 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
                 buffer.newLine();
                 buffer.newLine();
-                buffer.append(String.format(TRANSFORMER_CLASS_PATTERN, className));
+                buffer.append(String.format(Tools.TRANSFORMER_CLASS_PATTERN, className));
                 
                 //region "Constructor Generation"
-
 
                 buffer.newLine();
                 buffer.append(String.format("\tpublic %s() {", className));
@@ -139,7 +129,9 @@ public class AnnotationsProcessor extends AbstractProcessor {
                 buffer.newLine();
                 for (MapperInfo mapper : this.mappersList.values()) {
                     buffer.newLine();
-                    buffer.append(String.format("\t\taddMapper(new %s());", mapper.mapperClassName));
+                    buffer.append(String.format("\t\taddMapper(\"%s.%s\", new %s());", mapper.packageName, mapper.className, mapper.mapperClassName));
+                    buffer.newLine();
+                    buffer.append(String.format("\t\taddMapper(\"%s.%s\", new %s());", mapper.linkedPackageName, mapper.linkedClassName, mapper.mapperClassName));
                 }
                 
                 //endregion
@@ -170,8 +162,8 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
             mapperImports.add("import java.util.ArrayList;");
             mapperImports.add("import java.util.Collection;");
-            mapperImports.add(String.format(IMPORT_PATTERN, mapper.packageName, mapper.className));
-            mapperImports.add(String.format(IMPORT_PATTERN, mapper.linkedPackageName, mapper.linkedClassName));
+            mapperImports.add(String.format(Tools.IMPORT_PATTERN, mapper.packageName, mapper.className));
+            mapperImports.add(String.format(Tools.IMPORT_PATTERN, mapper.linkedPackageName, mapper.linkedClassName));
 
             for (MapperFieldInfo mapperField : mapper.getFields()) {
                 String originFieldName = mapperField.fieldName;
@@ -180,8 +172,8 @@ public class AnnotationsProcessor extends AbstractProcessor {
                 if (mapperField.withFieldName != null && !mapperField.withFieldName.trim().equals(""))
                     destinationFieldName = mapperField.withFieldName;
                 
-                directFields.add(String.format(MAPPER_FIELD_PATTERN, originFieldName, destinationFieldName));
-                inverseFields.add(String.format(MAPPER_FIELD_PATTERN, destinationFieldName, originFieldName));
+                directFields.add(String.format(Tools.MAPPER_FIELD_PATTERN, originFieldName, destinationFieldName));
+                inverseFields.add(String.format(Tools.MAPPER_FIELD_PATTERN, destinationFieldName, originFieldName));
             }
 
             generateMapperJavaFile(mapper, mapperImports, directFields, inverseFields);
@@ -197,7 +189,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
             JavaFileObject javaFileObject = processingEnv.getFiler().createSourceFile(mapper.mapperClassName);
             BufferedWriter buffer = new BufferedWriter(javaFileObject.openWriter());
             
-            buffer.append(String.format(PACKAGE_PATTERN, mapper.mapperPackageName));
+            buffer.append(String.format(Tools.PACKAGE_PATTERN, mapper.mapperPackageName));
             buffer.newLine();
             
             for (String classImport : imports) {
@@ -207,7 +199,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
             buffer.newLine();
             buffer.newLine();
-            buffer.append(String.format(CLASS_PATTERN, mapper.mapperClassName));
+            buffer.append(String.format(Tools.CLASS_PATTERN, mapper.mapperClassName));
 
             //generateTransformListMethod(buffer, mapper.className, mapper.linkedClassName);
             //generateTransformListMethod(buffer, mapper.linkedClassName, mapper.className);
@@ -422,8 +414,8 @@ public class AnnotationsProcessor extends AbstractProcessor {
         public MapperInfo(String packageName, String className, String linkedPackageName, String linkedClassName) {
             super(packageName, className);
             
-            this.mapperClassName = String.format(MAPPER_CLASS_NAME_PATTERN, className);
-            this.mapperPackageName = String.format(MAPPER_PACKAGE_PATTERN, packageName);
+            this.mapperClassName = String.format(Tools.MAPPER_CLASS_NAME_PATTERN, className);
+            this.mapperPackageName = String.format(Tools.MAPPER_PACKAGE_PATTERN, packageName);
             this.linkedPackageName = linkedPackageName;
             this.linkedClassName = linkedClassName;
         }

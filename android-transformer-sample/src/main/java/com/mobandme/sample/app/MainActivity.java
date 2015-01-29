@@ -27,9 +27,14 @@ package com.mobandme.sample.app;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
+import com.mobandme.android.transformer.Transformer;
+import com.mobandme.sample.app.domain.Home;
+import com.mobandme.sample.app.model.HomeModel;
 import com.mobandme.sample.app.model.mapper.MyHomeModelMapper;
 
 public class MainActivity extends Activity {
@@ -38,5 +43,23 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        try {
+
+            Home home = null;
+            HomeModel homeModel = new HomeModel();
+            homeModel.Address = "My Street, 65, 3";
+            homeModel.City = "Bilbao";
+            homeModel.Country = "Spain";
+            homeModel.PostalCode = "48903";
+
+            home = (Home)Transformer.transform(homeModel);
+            homeModel = (HomeModel)Transformer.transform(home);
+            
+            Toast.makeText(this, String.format("Transformed %s --> %s", homeModel.getClass().getSimpleName(), home.getClass().getSimpleName()), Toast.LENGTH_SHORT).show();
+            
+        } catch (Exception e) {
+            Log.e("android-transformer", e.getMessage(), e);
+        }
     }
 }

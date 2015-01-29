@@ -25,24 +25,14 @@
 
 package com.mobandme.android.transformer.internal;
 
-
-import java.util.HashMap;
-
-public abstract class AbstractTransformer {
-    protected HashMap<String, Object> mapperList = new HashMap<>();
-    
-    public Object getMapper(Object value) {
-        Object result = null;
-        String classCanonicalName = value.getClass().getCanonicalName();
-        
-        if (mapperList.containsKey(classCanonicalName))
-            result = mapperList.get(classCanonicalName);
-        
-        return result;
-    }
-    
-    protected void addMapper(String classCanonicalName, Object mapper) {
-        if (!mapperList.containsKey(classCanonicalName))
-            mapperList.put(classCanonicalName, mapper);
-    }
+public class Tools {
+    public final static String PACKAGE_PATTERN = "package %s;";
+    public final static String CLASS_PATTERN = "public class %s {";
+    public final static String TRANSFORMER_CLASS_NAME = "Transformer";
+    public final static String TRANSFORMER_PACKAGE_PATTERN = "%s.transformer";
+    public final static String TRANSFORMER_CLASS_PATTERN = "public final class %s extends AbstractTransformer {";
+    public final static String IMPORT_PATTERN = "import %s.%s;";
+    public final static String MAPPER_PACKAGE_PATTERN = "%s.mapper";
+    public final static String MAPPER_CLASS_NAME_PATTERN = "%sMapper";
+    public final static String MAPPER_FIELD_PATTERN = "result.%s = data.%s;";
 }
