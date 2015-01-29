@@ -28,14 +28,11 @@ package com.mobandme.sample.app;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.Toast;
-
 import com.mobandme.android.transformer.Transformer;
+import com.mobandme.sample.app.data.entity.HomeEntity;
 import com.mobandme.sample.app.domain.Home;
 import com.mobandme.sample.app.model.HomeModel;
-import com.mobandme.sample.app.model.mapper.MyHomeModelMapper;
 
 public class MainActivity extends Activity {
 
@@ -46,16 +43,31 @@ public class MainActivity extends Activity {
 
         try {
 
+            Home home = null;
+            
+            Transformer homeEntityTransformer = new Transformer
+                                                        .Builder()
+                                                            .build(HomeEntity.class);
+
             Transformer homeModelTransformer = new Transformer
                                                         .Builder()
                                                             .build(HomeModel.class);
-            Home home = null;
+            
+            HomeEntity homeEntity = new HomeEntity();
+            homeEntity.Address = "My Street, 65, 3";
+            homeEntity.City = "Bilbao";
+            homeEntity.Country = "Spain";
+            homeEntity.PostalCode = "48903";
+
             HomeModel homeModel = new HomeModel();
             homeModel.Address = "My Street, 65, 3";
             homeModel.City = "Bilbao";
             homeModel.Country = "Spain";
             homeModel.PostalCode = "48903";
-
+            
+            home = (Home)homeEntityTransformer.transform(homeEntity);
+            homeEntity = (HomeEntity)homeEntityTransformer.transform(home);
+                    
             home = (Home)homeModelTransformer.transform(homeModel);
             homeModel = (HomeModel)homeModelTransformer.transform(home);
             

@@ -22,6 +22,6 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':android-transformer')
-    compile project(':android-transformer-sample-data')
     compile project(':android-transformer-sample-domain')
+    compile project(':android-transformer-sample-data')
 }

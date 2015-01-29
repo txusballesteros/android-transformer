@@ -32,11 +32,12 @@ import com.mobandme.android.transformer.Mapping;
 @Mappable( with = Home.class )
 public class HomeModel {
     
-    @Mapping
-    public String Address;
+    @Mapping(withFieldName = "PostalAddress") public String Address;
     
-    public String City;
-    public String PostalCode;
-    public String Country;
+    @Mapping public String City;
+    
+    @Mapping public String PostalCode;
+    
+    @Mapping  public String Country;
     
 }

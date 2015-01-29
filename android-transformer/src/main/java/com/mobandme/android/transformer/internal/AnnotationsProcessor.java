@@ -69,8 +69,6 @@ public class AnnotationsProcessor extends AbstractProcessor {
         roundEnvironment = roundEnv;
         mappersList = new HashMap<>();
 
-        writeTrace("Processing android transformer annotations.");
-
         processMappableAnnotationElements();
 
         processMappingAnnotationElements();
@@ -172,8 +170,8 @@ public class AnnotationsProcessor extends AbstractProcessor {
                 if (mapperField.withFieldName != null && !mapperField.withFieldName.trim().equals(""))
                     destinationFieldName = mapperField.withFieldName;
                 
-                directFields.add(String.format(Tools.MAPPER_FIELD_PATTERN, originFieldName, destinationFieldName));
-                inverseFields.add(String.format(Tools.MAPPER_FIELD_PATTERN, destinationFieldName, originFieldName));
+                directFields.add(String.format(Tools.MAPPER_FIELD_PATTERN, destinationFieldName, originFieldName));
+                inverseFields.add(String.format(Tools.MAPPER_FIELD_PATTERN, originFieldName, destinationFieldName));
             }
 
             generateMapperJavaFile(mapper, mapperImports, directFields, inverseFields);
@@ -184,7 +182,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
         try {
 
-            writeTrace(String.format("Generating source file for mapper %s.%s", mapper.mapperPackageName, mapper.mapperClassName));
+            writeTrace(String.format("Generating source file for Mapper with name %s.%s", mapper.mapperPackageName, mapper.mapperClassName));
             
             JavaFileObject javaFileObject = processingEnv.getFiler().createSourceFile(mapper.mapperClassName);
             BufferedWriter buffer = new BufferedWriter(javaFileObject.openWriter());
@@ -201,8 +199,6 @@ public class AnnotationsProcessor extends AbstractProcessor {
             buffer.newLine();
             buffer.append(String.format(Tools.CLASS_PATTERN, mapper.mapperClassName));
 
-            //generateTransformListMethod(buffer, mapper.className, mapper.linkedClassName);
-            //generateTransformListMethod(buffer, mapper.linkedClassName, mapper.className);
             generateTransformMethod(buffer, mapper.className, mapper.linkedClassName, directFields);
             generateTransformMethod(buffer, mapper.linkedClassName, mapper.className, inverseFields);
 
@@ -213,31 +209,6 @@ public class AnnotationsProcessor extends AbstractProcessor {
         } catch (IOException error) {
             throw new RuntimeException(error);
         }
-    }
-
-    private void generateTransformListMethod(BufferedWriter buffer, String className, String linkedClassName) throws IOException {
-        buffer.newLine();
-        buffer.newLine();
-        buffer.append(String.format("\tpublic Collection<%s> transform(Collection<%s> data) {", linkedClassName, className));
-        buffer.newLine();
-        buffer.append(String.format("\t\tCollection<%s> result = new ArrayList<%s>();", linkedClassName, linkedClassName));
-        buffer.newLine();
-        buffer.newLine();
-        buffer.append(String.format("\t\tfor (%s element : data) {", className));
-        buffer.newLine();
-        buffer.append(String.format("\t\t\t%s transformedElement = transform(element);", linkedClassName));
-        buffer.newLine();
-        buffer.append("\t\t\tif (transformedElement != null)");
-        buffer.newLine();
-        buffer.append("\t\t\t\tresult.add(transformedElement);");
-
-        buffer.newLine();
-        buffer.append("\t\t}");
-        buffer.newLine();
-        buffer.newLine();
-        buffer.append("\t\treturn result;");
-        buffer.newLine();
-        buffer.append("\t}");
     }
     
     private void generateTransformMethod(BufferedWriter buffer, String className, String linkedClassName, Collection<String> fields) throws IOException {
@@ -282,8 +253,6 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
                 if (!haveMapper(mappableClassInfo))
                     createMapper(mappableClassInfo, linkedClassInfo);
-                
-                writeTrace(String.format("\tProcessing class %s.%s linked to %s.%s", mappableClassInfo.packageName, mappableClassInfo.className, linkedClassInfo.packageName, linkedClassInfo.className));
             }
         }
     }
@@ -302,8 +271,6 @@ public class AnnotationsProcessor extends AbstractProcessor {
                 getMapper(classInfo)
                         .getFields()
                             .add(mappingFieldInfo);
-                
-                writeTrace(String.format("\t\tProcessing field %s.%s linked to %s", classInfo.getFullName(), fieldName, withFieldName));
             }
         }
     }
