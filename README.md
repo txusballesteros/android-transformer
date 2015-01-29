@@ -51,13 +51,22 @@ IMPORTANT, You don't need configure nothing on your destination classes because 
 ```java
 public class MainActivity extends Activity {
     
-    private void MyMethod(HomeModel homeModel) {
-         //Build your Class transformer.
-         Transformer homeModelTransformer = new Transformer
+    private void MyMethod(HomeModel model) {
+        //Build your Class transformer.
+        Transformer homeModelTransformer = new Transformer
                                                     .Builder()
                                                         .build(HomeModel.class);
-                                                        
-         Home home = (Home)homeModelTransformer.transform(homeModel);
+         
+        ...
+        
+        //Converting your Model objects to your Domain objects.
+        Home home = (Home)homeModelTransformer.transform(model);
+        
+        ...
+        
+        //Converting your Domain objects to your Model objects.
+        HomeModel homeModel = (HomeModel)homeModelTransformer.transform(home);
+        
         ...
     }
 }
