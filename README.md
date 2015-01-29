@@ -13,7 +13,7 @@ Android Transformer It's Java library to manage your object transformations betw
 ```java
 dependencies {
     ...
-    compile 'com.mobandme:android-transformer:1.0+'
+    compile 'com.mobandme:android-transformer:1.0.0'
 }
 ```
 Add the library dependency to your build.gradle file.
