@@ -1,0 +1,1 @@
+include ':android-transformer-sample', ':android-transformer', ':android-transformer-sample-domain', ':android-transformer-sample-data'
