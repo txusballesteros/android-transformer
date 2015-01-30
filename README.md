@@ -63,7 +63,7 @@ public class MainActivity extends Activity {
         //Converting your Model objects to your Domain objects.
         Home home = (Home)homeModelTransformer.transform(model);
         
-        //If you don't like castings between your objects, you can use this.
+        //If you don't like make castings between your objects, you can use this.
         Home home = homeModelTransformer.transform(model, Home.class);
         
         ...
@@ -71,7 +71,7 @@ public class MainActivity extends Activity {
         //Converting your Domain objects to your Model objects.
         HomeModel homeModel = (HomeModel)homeModelTransformer.transform(home);
         
-        //If you don't like castings between your objects, you can use this.
+        //If you don't like make castings between your objects, you can use this.
         HomeModel homeModel = homeModelTransformer.transform(home, HomeModel.class);
         ...
     }
