@@ -49,18 +49,26 @@ public class MainActivity extends Activity {
 
             Transformer homeEntityTransformer = new Transformer
                                                         .Builder()
-                                                            .build(HomeEntity.class);
+                                                                .build(HomeEntity.class);
             
             HomeModel homeModel = new HomeModel();
             homeModel.Address = "My Street, 65, 3";
             homeModel.City = "Bilbao";
             homeModel.Country = "Spain";
             homeModel.PostalCode = "48903";
-            
-            Home home = (Home)homeModelTransformer.transform(homeModel);
-            HomeEntity homeEntity = (HomeEntity)homeEntityTransformer.transform(home);
 
-            Toast.makeText(this, String.format("Transformed %s --> %s", homeModel.getClass().getSimpleName(), home.getClass().getSimpleName()), Toast.LENGTH_SHORT).show();
+            Home homeDomain = null;
+            HomeEntity homeEntity = null;
+            homeDomain = homeModelTransformer.transform(homeModel, Home.class);
+            homeEntity = homeEntityTransformer.transform(homeDomain, HomeEntity.class);
+
+            
+            homeDomain = null;
+            homeModel = null;
+            homeDomain = homeEntityTransformer.transform(homeEntity, Home.class);
+            homeModel = homeModelTransformer.transform(homeDomain, HomeModel.class);
+
+            //Toast.makeText(this, String.format("Transformed %s --> %s", homeModel.getClass().getSimpleName(), homeDomain.getClass().getSimpleName()), Toast.LENGTH_SHORT).show();
             
         } catch (Exception e) {
             Log.e("android-transformer", e.getMessage(), e);

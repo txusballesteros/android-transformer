@@ -31,6 +31,7 @@ import com.mobandme.android.transformer.internal.Tools;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 public final class Transformer {
     public static class Builder {
@@ -48,15 +49,32 @@ public final class Transformer {
     private Transformer(Class<?> type) {
         this.transformerType = type;
     }
-    
+
+
+
+    /**
+     * Use this method to transform your POJO object to the linked POJO object.
+     * @param value Instance of the source object.
+     * @return An instance of the converted object.
+     */
     public Object transform(Object value) {
-        Object result = null;
+        return transform(value, null);
+    }
+
+    /**
+     * Use this method to transform your POJO object to the linked POJO object.
+     * @param value Instance of the source object.
+     * @param expectedReturnType Use this argument to set the return expected type.*
+     * @param <T> Generic type
+     * @return An instance of the converted object.
+     */
+    public <T> T transform(Object value, Class<T> expectedReturnType) {
+        Object result;
+
+        if (value == null)
+            throw new IllegalArgumentException("The 'value' parameter cannot be null.");
         
         try {
-            
-
-            if (value == null)
-                throw new IllegalArgumentException("The 'value' parameter cannot be null.");
 
             String transformerCanonicalName = getTransformerCanonicalName();
             AbstractTransformer transformer = getTransformerInstance(transformerCanonicalName);
@@ -67,7 +85,7 @@ public final class Transformer {
             throw new RuntimeException(e);
         }
         
-        return result;
+        return (T)result;
     }
     
     private String getTransformerCanonicalName() {
