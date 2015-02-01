@@ -31,4 +31,5 @@ public class Home {
     public String City;
     public String PostalCode;
     public String Country;
+    public String Date;
 }

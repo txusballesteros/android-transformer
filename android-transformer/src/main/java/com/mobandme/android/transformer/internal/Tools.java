@@ -35,4 +35,5 @@ public class Tools {
     public final static String MAPPER_PACKAGE_PATTERN = "%s.mapper";
     public final static String MAPPER_CLASS_NAME_PATTERN = "%sMapper";
     public final static String MAPPER_FIELD_PATTERN = "result.%s = data.%s;";
+    public final static String MAPPER_FIELD__WITH_PARSER_PATTERN = "result.%s = new %s<%s>().parse(data.%s);";
 }

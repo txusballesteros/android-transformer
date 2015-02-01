@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright Txus Ballesteros 2015 (@txusballesteros)
  *
  * This file is part of some open source application.
@@ -23,30 +23,21 @@
  * Contact: Txus Ballesteros <txus.ballesteros@gmail.com>
  */
 
-package com.mobandme.sample.app.model;
+package com.mobandme.android.transformer.parser;
 
-import com.mobandme.android.transformer.Mappable;
-import com.mobandme.android.transformer.Mapped;
-import com.mobandme.sample.app.domain.Home;
-import com.mobandme.sample.app.model.parser.CalendarParser;
+/**
+ * This is the base class to implement a custom parser to your transformations.
+ */
+public abstract class AbstractParser<T> {
+    
+    public final T parse(Object value) {
+        return onParse(value);
+    }
 
-import java.util.Calendar;
-
-@Mappable( with = Home.class )
-public class HomeModel {
-    
-    @Mapped(toField = "PostalAddress") public String Address;
-    
-    @Mapped
-    public String City;
-    
-    @Mapped
-    public String PostalCode;
-    
-    @Mapped
-    public String Country;
-    
-    @Mapped(parseWith = CalendarParser.class)
-    public Calendar Date;
-    
+    /**
+     * Override this method to implement the logic of your parser.
+     * @param value The value that will to be parse.
+     * @return The parser result value.
+     */
+    protected abstract T onParse(Object value);
 }

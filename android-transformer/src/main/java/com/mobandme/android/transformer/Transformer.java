@@ -115,8 +115,7 @@ public final class Transformer {
     }
     
     private Object getMapperInstance(AbstractTransformer transformer, Object value) {
-        Object result = transformer.getMapper(value);
-        return result;
+        return transformer.getMapper(value);
     }
     
     private Object executeTransformation(Object mapper, Object value) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
