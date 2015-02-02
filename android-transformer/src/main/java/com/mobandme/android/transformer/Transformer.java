@@ -31,7 +31,6 @@ import com.mobandme.android.transformer.internal.Tools;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Objects;
 
 public final class Transformer {
     public static class Builder {
@@ -122,7 +121,7 @@ public final class Transformer {
         Object result = null;
         Method transforMethod = mapper.getClass().getMethod("transform", value.getClass());
         if (transforMethod != null)
-            result = transforMethod.invoke(mapper, value);
+            result = transforMethod.invoke(null, value);
         
         return result;
     }

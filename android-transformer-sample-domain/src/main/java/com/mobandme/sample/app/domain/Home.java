@@ -32,4 +32,5 @@ public class Home {
     public String PostalCode;
     public String Country;
     public String Date;
+    public HomeColor HomeColor;
 }
