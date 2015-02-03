@@ -156,6 +156,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
     private void buildMapperObjects() {
         for (MapperInfo mapper : this.mappersList.values()) {
             Collection<String> mapperImports = new ArrayList<>();
+            Collection<String> classVars = new ArrayList<>();
             Collection<String> directFields = new ArrayList<>();
             Collection<String> inverseFields = new ArrayList<>();
 
@@ -178,18 +179,13 @@ public class AnnotationsProcessor extends AbstractProcessor {
                     destinationFieldName = mapperField.withFieldName;
 
                 if (parseWithClassName == null) {
-                    boolean foundComposite = false;
-                    for (MapperInfo mapperAux : mappersList.values()) {
-                        if (mapperField.fieldType.equals(mapperAux.mappableClassName)) {
-                            foundComposite = true;
-                            //mapperImports.add(String.format(Tools.IMPORT_PATTERN, mapperAux.mapperPackageName, mapperAux.mappableClassName));
-                            mapperImports.add(String.format(Tools.IMPORT_PATTERN, mapperAux.mapperPackageName, mapperAux.mapperClassName));
-                            directFields.add(String.format(Tools.MAPPER_FIELD_COMPOSITE_PATTERN, destinationFieldName, mapperAux.mapperClassName, originFieldName));
-                            inverseFields.add(String.format(Tools.MAPPER_FIELD_COMPOSITE_PATTERN, originFieldName, mapperAux.mapperClassName, destinationFieldName));
-                            break;
-                        }
-                    }
-                    if (!foundComposite) {
+                    MapperInfo mapperInfo = mapperForMapperField(mapperField);
+                    if (mapperInfo != null) {
+                        mapperImports.add(String.format(Tools.IMPORT_PATTERN, mapperInfo.mapperPackageName, mapperInfo.mapperClassName));
+                        classVars.add(String.format(Tools.MAPPER_CLASS_VAR_CONSTANT_PATTERN, mapperInfo.mapperClassName, toCamelCase(mapperInfo.mapperClassName), mapperInfo.mapperClassName));
+                        directFields.add(String.format(Tools.MAPPER_FIELD_COMPOSITE_PATTERN, destinationFieldName, toCamelCase(mapperInfo.mapperClassName), originFieldName));
+                        inverseFields.add(String.format(Tools.MAPPER_FIELD_COMPOSITE_PATTERN, originFieldName, toCamelCase(mapperInfo.mapperClassName), destinationFieldName));
+                    } else {
                         directFields.add(String.format(Tools.MAPPER_FIELD_PATTERN, destinationFieldName, originFieldName));
                         inverseFields.add(String.format(Tools.MAPPER_FIELD_PATTERN, originFieldName, destinationFieldName));
                     }
@@ -203,11 +199,24 @@ public class AnnotationsProcessor extends AbstractProcessor {
                 }
             }
 
-            generateMapperJavaFile(mapper, mapperImports, directFields, inverseFields);
+            generateMapperJavaFile(mapper, classVars, mapperImports, directFields, inverseFields);
         }
     }
 
-    private void generateMapperJavaFile(MapperInfo mapper, Collection<String> imports, Collection<String> directFields, Collection<String> inverseFields) {
+    private MapperInfo mapperForMapperField(MapperFieldInfo mapperField) {
+        for (MapperInfo mapperInfo : mappersList.values()) {
+            if (mapperField.fieldType.equals(mapperInfo.mappableClassName)) {
+                return mapperInfo;
+            }
+        }
+        return null;
+    }
+
+    private String toCamelCase(String className) {
+        return className.substring(0, 1).toLowerCase() + className.substring(1);
+    }
+
+    private void generateMapperJavaFile(MapperInfo mapper, Collection<String> classVars, Collection<String> imports, Collection<String> directFields, Collection<String> inverseFields) {
 
         try {
 
@@ -228,6 +237,14 @@ public class AnnotationsProcessor extends AbstractProcessor {
             buffer.newLine();
             buffer.append(String.format(Tools.CLASS_PATTERN, mapper.mapperClassName));
 
+            if (classVars.size() > 0) {
+                buffer.newLine();
+                for (String classVar : classVars) {
+                    buffer.newLine();
+                    buffer.append("\t").append(classVar);
+                }
+            }
+
             generateTransformMethod(buffer, mapper.className, mapper.linkedClassName, directFields);
             generateTransformMethod(buffer, mapper.linkedClassName, mapper.className, inverseFields);
 
@@ -243,7 +260,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
     private void generateTransformMethod(BufferedWriter buffer, String className, String linkedClassName, Collection<String> fields) throws IOException {
         buffer.newLine();
         buffer.newLine();
-        buffer.append(String.format("\tpublic static %s transform(%s data) {", linkedClassName, className));
+        buffer.append(String.format("\tpublic %s transform(%s data) {", linkedClassName, className));
         buffer.newLine();
         buffer.append(String.format("\t\t%s result = null;", linkedClassName));
 

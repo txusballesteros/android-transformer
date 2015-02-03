@@ -121,7 +121,7 @@ public final class Transformer {
         Object result = null;
         Method transforMethod = mapper.getClass().getMethod("transform", value.getClass());
         if (transforMethod != null)
-            result = transforMethod.invoke(null, value);
+            result = transforMethod.invoke(mapper, value);
         
         return result;
     }
