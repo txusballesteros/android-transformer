@@ -18,6 +18,13 @@ dependencies {
 }
 ```
 
+If you are using any other libraries with AnnotationsProcessors like ButterKnife, Realm, etc... You need to set this in your build.gradle to exclude the Processor that is already packaged:
+```groovy
+packagingOptions {
+    exclude 'META-INF/services/javax.annotation.processing.Processor'
+}
+```
+
 Use @Mappable annotation on your class definitions and @Mapped on the fields that you want map to the destination object. See that you destination object type
 is defined by the 'with' configuration on @Mappable annotation.
 
