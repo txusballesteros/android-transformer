@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright Txus Ballesteros 2015 (@txusballesteros)
  *
  * This file is part of some open source application.
@@ -22,15 +22,23 @@
  *
  * Contact: Txus Ballesteros <txus.ballesteros@gmail.com>
  */
+package com.mobandme.sample.app.model;
 
-package com.mobandme.sample.app.domain;
+import com.mobandme.android.transformer.Mappable;
+import com.mobandme.android.transformer.Mapped;
+import com.mobandme.sample.app.domain.HomeColor;
 
-public class Home {
-    
-    public String PostalAddress;
-    public String City;
-    public String PostalCode;
-    public String Country;
-    public String Date;
-    public HomeColor HomeColor;
+@Mappable( with = HomeColor.class )
+public class HomeColorModel {
+    @Mapped
+    public String colorName;
+    @Mapped
+    public String colorHex;
+
+    @Override public String toString() {
+        return "HomeColorModel{" +
+                "colorName='" + colorName + '\'' +
+                ", colorHex='" + colorHex + '\'' +
+                '}';
+    }
 }

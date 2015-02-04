@@ -28,13 +28,15 @@ package com.mobandme.sample.app;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 import com.mobandme.android.transformer.Transformer;
 import com.mobandme.sample.app.data.entity.HomeEntity;
 import com.mobandme.sample.app.domain.Home;
+import com.mobandme.sample.app.model.HomeColorModel;
 import com.mobandme.sample.app.model.HomeModel;
 
 public class MainActivity extends Activity {
+
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,18 +58,24 @@ public class MainActivity extends Activity {
             homeModel.City = "Bilbao";
             homeModel.Country = "Spain";
             homeModel.PostalCode = "48903";
+            homeModel.HomeColor = new HomeColorModel();
+            homeModel.HomeColor.colorHex = "#FF0000";
+            homeModel.HomeColor.colorName = "Red";
 
             Home homeDomain = null;
             HomeEntity homeEntity = null;
             homeDomain = homeModelTransformer.transform(homeModel, Home.class);
             homeEntity = homeEntityTransformer.transform(homeDomain, HomeEntity.class);
 
-            
+            Log.d(TAG, homeDomain.toString());
+            Log.d(TAG, homeModel.toString());
             homeDomain = null;
             homeModel = null;
             homeDomain = homeEntityTransformer.transform(homeEntity, Home.class);
             homeModel = homeModelTransformer.transform(homeDomain, HomeModel.class);
 
+            Log.d(TAG, homeDomain.toString());
+            Log.d(TAG, homeModel.toString());
             //Toast.makeText(this, String.format("Transformed %s --> %s", homeModel.getClass().getSimpleName(), homeDomain.getClass().getSimpleName()), Toast.LENGTH_SHORT).show();
             
         } catch (Exception e) {

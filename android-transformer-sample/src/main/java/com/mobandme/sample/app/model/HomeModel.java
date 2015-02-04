@@ -28,7 +28,6 @@ package com.mobandme.sample.app.model;
 import com.mobandme.android.transformer.Mappable;
 import com.mobandme.android.transformer.Mapped;
 import com.mobandme.sample.app.domain.Home;
-import com.mobandme.sample.app.model.parser.CalendarParser;
 
 import java.util.Calendar;
 
@@ -36,7 +35,10 @@ import java.util.Calendar;
 public class HomeModel {
     
     @Mapped(toField = "PostalAddress") public String Address;
-    
+
+    @Mapped
+    public HomeColorModel HomeColor;
+
     @Mapped
     public String City;
     
@@ -46,7 +48,17 @@ public class HomeModel {
     @Mapped
     public String Country;
     
-    @Mapped(parseWith = CalendarParser.class)
+    //@Mapped(parseWith = CalendarParser.class)
     public Calendar Date;
-    
+
+    @Override public String toString() {
+        return "HomeModel{" +
+                "Address='" + Address + '\'' +
+                ", HomeColor=" + HomeColor +
+                ", City='" + City + '\'' +
+                ", PostalCode='" + PostalCode + '\'' +
+                ", Country='" + Country + '\'' +
+                ", Date=" + Date +
+                '}';
+    }
 }
