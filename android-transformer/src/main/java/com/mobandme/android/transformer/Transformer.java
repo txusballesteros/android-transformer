@@ -88,13 +88,7 @@ public final class Transformer {
     }
     
     private String getTransformerCanonicalName() {
-        String result;
-        
-        String packageName = String.format(Tools.TRANSFORMER_PACKAGE_PATTERN, transformerType.getPackage().getName());
-        String className = Tools.TRANSFORMER_CLASS_NAME;
-        result = String.format("%s.%s", packageName, className);
-        
-        return result;
+        return String.format("%s.%s", Tools.TRANSFORMER_PACKAGE, Tools.TRANSFORMER_CLASS_NAME);
     }
     
     private AbstractTransformer getTransformerInstance(String transformerCanonicalName) {

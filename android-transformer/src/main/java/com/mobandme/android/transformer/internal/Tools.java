@@ -29,7 +29,7 @@ public class Tools {
     public final static String PACKAGE_PATTERN = "package %s;";
     public final static String CLASS_PATTERN = "public class %s {";
     public final static String TRANSFORMER_CLASS_NAME = "Transformer";
-    public final static String TRANSFORMER_PACKAGE_PATTERN = "%s.transformer";
+    public final static String TRANSFORMER_PACKAGE = "com.mobandme.android.transformer.config";
     public final static String TRANSFORMER_CLASS_PATTERN = "public final class %s extends AbstractTransformer {";
     public final static String IMPORT_PATTERN = "import %s.%s;";
     public final static String MAPPER_PACKAGE_PATTERN = "%s.mapper";
