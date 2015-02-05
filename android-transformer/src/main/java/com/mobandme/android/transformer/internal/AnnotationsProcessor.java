@@ -85,17 +85,15 @@ public class AnnotationsProcessor extends AbstractProcessor {
         try {
 
             if (mappersList.size() > 0) {
-                MapperInfo firstMapper = (MapperInfo)mappersList.values().toArray()[0];
 
-                String packageName = String.format(Tools.TRANSFORMER_PACKAGE_PATTERN, firstMapper.packageName);
                 String className = Tools.TRANSFORMER_CLASS_NAME;
 
-                writeTrace(String.format("Generating source file for Transformer class with name %s.%s", packageName, className));
+                writeTrace(String.format("Generating source file for Transformer class with name %s.%s", Tools.TRANSFORMER_PACKAGE, className));
 
                 JavaFileObject javaFileObject = processingEnv.getFiler().createSourceFile(className);
                 BufferedWriter buffer = new BufferedWriter(javaFileObject.openWriter());
 
-                buffer.append(String.format(Tools.PACKAGE_PATTERN, packageName));
+                buffer.append(String.format(Tools.PACKAGE_PATTERN, Tools.TRANSFORMER_PACKAGE));
                 buffer.newLine();
 
                 //region "Class Imports Generation"
