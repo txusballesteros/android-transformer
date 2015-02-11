@@ -76,81 +76,9 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
         buildMapperObjects();
 
-        buildTransformerJavaFile();
+        generateTransformerJavaFile();
 
         return true;
-    }
-
-    private void buildTransformerJavaFile() {
-        try {
-
-            if (mappersList.size() > 0) {
-                MapperInfo firstMapper = (MapperInfo)mappersList.values().toArray()[0];
-
-                String packageName = String.format(Tools.TRANSFORMER_PACKAGE_PATTERN, firstMapper.packageName);
-                String className = Tools.TRANSFORMER_CLASS_NAME;
-
-                writeTrace(String.format("Generating source file for Transformer class with name %s.%s", packageName, className));
-
-                JavaFileObject javaFileObject = processingEnv.getFiler().createSourceFile(className);
-                BufferedWriter buffer = new BufferedWriter(javaFileObject.openWriter());
-
-                buffer.append(String.format(Tools.PACKAGE_PATTERN, packageName));
-                buffer.newLine();
-
-                //region "Class Imports Generation"
-
-                buffer.newLine();
-                buffer.append(String.format(Tools.IMPORT_PATTERN, "com.mobandme.android.transformer.internal", "AbstractTransformer"));
-                for (MapperInfo mapper : mappersList.values()) {
-
-                    buffer.newLine();
-                    buffer.append(String.format(Tools.IMPORT_PATTERN, mapper.mapperPackageName, mapper.mapperClassName));
-                }
-
-                //endregion
-
-                //region "Class Generation"
-
-                buffer.newLine();
-                buffer.newLine();
-                buffer.append(String.format(Tools.TRANSFORMER_CLASS_PATTERN, className));
-
-                //region "Constructor Generation"
-
-                buffer.newLine();
-                buffer.append(String.format("\tpublic %s() {", className));
-                buffer.newLine();
-                buffer.append("\t\tsuper();");
-
-                //region "Variable Inicialization"
-
-                buffer.newLine();
-                for (MapperInfo mapper : this.mappersList.values()) {
-                    buffer.newLine();
-                    buffer.append(String.format("\t\taddMapper(\"%s.%s\", new %s());", mapper.packageName, mapper.className, mapper.mapperClassName));
-                    buffer.newLine();
-                    buffer.append(String.format("\t\taddMapper(\"%s.%s\", new %s());", mapper.linkedPackageName, mapper.linkedClassName, mapper.mapperClassName));
-                }
-
-                //endregion
-
-                buffer.newLine();
-                buffer.append("\t}");
-
-                //endregion
-
-                buffer.newLine();
-                buffer.append("}");
-
-                //endregion
-
-                buffer.close();
-            }
-
-        } catch (IOException error) {
-            throw new RuntimeException(error);
-        }
     }
 
     private void buildMapperObjects() {
@@ -190,12 +118,8 @@ public class AnnotationsProcessor extends AbstractProcessor {
                         inverseFields.add(String.format(Tools.MAPPER_FIELD_PATTERN, originFieldName, destinationFieldName));
                     }
                 } else {
-
-                    String directParserTypeName = String.format("result.%s.getClass()", destinationFieldName);
-                    String inverserParserTypeName = String.format("result.%s.getClass()", originFieldName);
-
-                    directFields.add(String.format(Tools.MAPPER_FIELD__WITH_PARSER_PATTERN, destinationFieldName, parseWithClassName, directParserTypeName, originFieldName));
-                    inverseFields.add(String.format(Tools.MAPPER_FIELD__WITH_PARSER_PATTERN, originFieldName, parseWithClassName, inverserParserTypeName, destinationFieldName));
+                    directFields.add(String.format(Tools.MAPPER_FIELD__WITH_PARSER_PATTERN, destinationFieldName, mapperField.fieldType, parseWithClassName, originFieldName));
+                    inverseFields.add(String.format(Tools.MAPPER_FIELD__WITH_PARSER_PATTERN, originFieldName, mapperField.fieldType, parseWithClassName, destinationFieldName));
                 }
             }
 
@@ -220,9 +144,10 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
         try {
 
-            writeTrace(String.format("Generating source file for Mapper with name %s.%s", mapper.mapperPackageName, mapper.mapperClassName));
+            String mapperCanonicalName = String.format("%s.%s", mapper.mapperPackageName, mapper.mapperClassName);
+            writeTrace(String.format("Generating source file for Mapper with name %s", mapperCanonicalName));
 
-            JavaFileObject javaFileObject = processingEnv.getFiler().createSourceFile(mapper.mapperClassName);
+            JavaFileObject javaFileObject = processingEnv.getFiler().createSourceFile(mapperCanonicalName);
             BufferedWriter buffer = new BufferedWriter(javaFileObject.openWriter());
 
             buffer.append(String.format(Tools.PACKAGE_PATTERN, mapper.mapperPackageName));
@@ -285,6 +210,79 @@ public class AnnotationsProcessor extends AbstractProcessor {
         buffer.newLine();
         buffer.append("\t}");
     }
+    
+    private void generateTransformerJavaFile() {
+        try {
+
+            if (mappersList.size() > 0) {
+                MapperInfo firstMapper = (MapperInfo)mappersList.values().toArray()[0];
+
+                String packageName = String.format(Tools.TRANSFORMER_PACKAGE_PATTERN, firstMapper.packageName);
+                String className = Tools.TRANSFORMER_CLASS_NAME;
+
+                String transformerCanonicalName = String.format("%s.%s", packageName, className);
+                writeTrace(String.format("Generating source file for Transformer class with name %s", transformerCanonicalName));
+
+                JavaFileObject javaFileObject = processingEnv.getFiler().createSourceFile(transformerCanonicalName);
+                BufferedWriter buffer = new BufferedWriter(javaFileObject.openWriter());
+
+                buffer.append(String.format(Tools.PACKAGE_PATTERN, packageName));
+                buffer.newLine();
+
+                //region "Class Imports Generation"
+
+                buffer.newLine();
+                buffer.append(String.format(Tools.IMPORT_PATTERN, "com.mobandme.android.transformer.internal", "AbstractTransformer"));
+                for (MapperInfo mapper : mappersList.values()) {
+
+                    buffer.newLine();
+                    buffer.append(String.format(Tools.IMPORT_PATTERN, mapper.mapperPackageName, mapper.mapperClassName));
+                }
+
+                //endregion
+
+                //region "Class Generation"
+
+                buffer.newLine();
+                buffer.newLine();
+                buffer.append(String.format(Tools.TRANSFORMER_CLASS_PATTERN, className));
+
+                //region "Constructor Generation"
+
+                buffer.newLine();
+                buffer.append(String.format("\tpublic %s() {", className));
+                buffer.newLine();
+                buffer.append("\t\tsuper();");
+
+                //region "Variable Inicialization"
+
+                buffer.newLine();
+                for (MapperInfo mapper : this.mappersList.values()) {
+                    buffer.newLine();
+                    buffer.append(String.format("\t\taddMapper(\"%s.%s\", new %s());", mapper.packageName, mapper.className, mapper.mapperClassName));
+                    buffer.newLine();
+                    buffer.append(String.format("\t\taddMapper(\"%s.%s\", new %s());", mapper.linkedPackageName, mapper.linkedClassName, mapper.mapperClassName));
+                }
+
+                //endregion
+
+                buffer.newLine();
+                buffer.append("\t}");
+
+                //endregion
+
+                buffer.newLine();
+                buffer.append("}");
+
+                //endregion
+
+                buffer.close();
+            }
+
+        } catch (IOException error) {
+            throw new RuntimeException(error);
+        }
+    }
 
     private void processMappableAnnotationElements() {
         for (Element mappableElement : roundEnvironment.getElementsAnnotatedWith(Mappable.class)) {
@@ -312,22 +310,24 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
                 AnnotationMirror annotationMirror = getAnnotationMirror(mappedElement, Mapped.class);
                 AnnotationValue  annotationValue = getAnnotationValue(annotationMirror, "parseWith");
-                TypeElement paserWithElement = getTypeElement(annotationValue);
+                TypeElement parserWithElement = getTypeElement(annotationValue);
+                
                 ClassInfo parseWithClassInfo = new ClassInfo(AbstractTransformer.class.getPackage().getName(), AbstractParser.class.getSimpleName());
-                if (paserWithElement != null)
-                    parseWithClassInfo = extractClassInformation(paserWithElement);
+                if (parserWithElement != null)
+                    parseWithClassInfo = extractClassInformation(parserWithElement);
 
                 //endregion
-
+                
                 String fieldName = mappedElement.getSimpleName().toString();
+                String fieldType = mappedElement.asType().toString();
                 String toFieldName = mappedAnnotation.toField();
 
-                MapperFieldInfo mappingFieldInfo = new MapperFieldInfo(fieldName, mappedElement.asType().toString(), toFieldName, parseWithClassInfo.packageName, parseWithClassInfo.className);
+                MapperFieldInfo mappingFieldInfo = new MapperFieldInfo(fieldName, fieldType, toFieldName, parseWithClassInfo.packageName, parseWithClassInfo.className);
 
                 ClassInfo classInfo = extractClassInformationFromField(mappedElement);
                 getMapper(classInfo)
-                        .getFields()
-                        .add(mappingFieldInfo);
+                            .getFields()
+                                .add(mappingFieldInfo);
             }
         }
     }

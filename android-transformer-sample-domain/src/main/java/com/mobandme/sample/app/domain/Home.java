@@ -26,7 +26,6 @@
 package com.mobandme.sample.app.domain;
 
 public class Home {
-    
     public String PostalAddress;
     public String City;
     public String PostalCode;

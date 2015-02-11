@@ -28,9 +28,9 @@ package com.mobandme.android.transformer.parser;
 /**
  * This is the base class to implement a custom parser to your transformations.
  */
-public abstract class AbstractParser<T> {
+public abstract class AbstractParser {
     
-    public final T parse(Object value) {
+    public final Object parse(Object value) {
         return onParse(value);
     }
 
@@ -39,5 +39,5 @@ public abstract class AbstractParser<T> {
      * @param value The value that will to be parse.
      * @return The parser result value.
      */
-    protected abstract T onParse(Object value);
+    protected abstract Object onParse(Object value);
 }

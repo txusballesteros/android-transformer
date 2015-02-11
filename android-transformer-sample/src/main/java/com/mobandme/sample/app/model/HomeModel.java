@@ -27,7 +27,9 @@ package com.mobandme.sample.app.model;
 
 import com.mobandme.android.transformer.Mappable;
 import com.mobandme.android.transformer.Mapped;
+import com.mobandme.android.transformer.ParseWith;
 import com.mobandme.sample.app.domain.Home;
+import com.mobandme.sample.app.model.parser.CalendarParser;
 
 import java.util.Calendar;
 
@@ -48,7 +50,7 @@ public class HomeModel {
     @Mapped
     public String Country;
     
-    //@Mapped(parseWith = CalendarParser.class)
+    @Mapped(parseWith = CalendarParser.class)
     public Calendar Date;
 
     @Override public String toString() {
