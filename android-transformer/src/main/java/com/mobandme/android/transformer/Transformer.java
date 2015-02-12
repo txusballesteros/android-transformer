@@ -49,8 +49,6 @@ public final class Transformer {
         this.transformerType = type;
     }
 
-
-
     /**
      * Use this method to transform your POJO object to the linked POJO object.
      * @param value Instance of the source object.
@@ -98,7 +96,7 @@ public final class Transformer {
     }
     
     private AbstractTransformer getTransformerInstance(String transformerCanonicalName) {
-        AbstractTransformer result = null;
+        AbstractTransformer result;
         
         try {
             

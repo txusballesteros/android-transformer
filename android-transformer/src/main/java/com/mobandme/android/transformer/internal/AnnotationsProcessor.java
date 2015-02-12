@@ -27,7 +27,7 @@ package com.mobandme.android.transformer.internal;
 
 import com.mobandme.android.transformer.Mappable;
 import com.mobandme.android.transformer.Mapped;
-import com.mobandme.android.transformer.parser.AbstractParser;
+import com.mobandme.android.transformer.Parse;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -58,7 +58,8 @@ import java.util.Set;
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes({
         "com.mobandme.android.transformer.Mapping",
-        "com.mobandme.android.transformer.Mappable"
+        "com.mobandme.android.transformer.Mappable",
+        "com.mobandme.android.transformer.Parse"
 })
 public class AnnotationsProcessor extends AbstractProcessor {
 
@@ -71,11 +72,10 @@ public class AnnotationsProcessor extends AbstractProcessor {
         mappersList = new HashMap<>();
 
         processMappableAnnotationElements();
-
         processMappedAnnotationElements();
-
+        processParseAnnotationElements();
+        
         buildMapperObjects();
-
         generateTransformerJavaFile();
 
         return true;
@@ -94,19 +94,13 @@ public class AnnotationsProcessor extends AbstractProcessor {
             mapperImports.add(String.format(Tools.IMPORT_PATTERN, mapper.linkedPackageName, mapper.linkedClassName));
 
             for (MapperFieldInfo mapperField : mapper.getFields()) {
-                String parseWithClassName = mapperField.parseWithClassName;
-                if (!parseWithClassName.equals(AbstractParser.class.getSimpleName()))
-                    mapperImports.add(String.format(Tools.IMPORT_PATTERN, mapperField.parseWithPackageName, mapperField.parseWithClassName));
-                else
-                    parseWithClassName = null;
-
                 String originFieldName = mapperField.fieldName;
                 String destinationFieldName = mapperField.fieldName;
 
                 if (mapperField.withFieldName != null && !mapperField.withFieldName.trim().equals(""))
                     destinationFieldName = mapperField.withFieldName;
 
-                if (parseWithClassName == null) {
+                if (mapperField.originToDestinationParserClassName == null && mapperField.destinationToOriginParserClassName == null) {
                     MapperInfo mapperInfo = mapperForMapperField(mapperField);
                     if (mapperInfo != null) {
                         mapperImports.add(String.format(Tools.IMPORT_PATTERN, mapperInfo.mapperPackageName, mapperInfo.mapperClassName));
@@ -118,8 +112,11 @@ public class AnnotationsProcessor extends AbstractProcessor {
                         inverseFields.add(String.format(Tools.MAPPER_FIELD_PATTERN, originFieldName, destinationFieldName));
                     }
                 } else {
-                    directFields.add(String.format(Tools.MAPPER_FIELD__WITH_PARSER_PATTERN, destinationFieldName, mapperField.fieldType, parseWithClassName, originFieldName));
-                    inverseFields.add(String.format(Tools.MAPPER_FIELD__WITH_PARSER_PATTERN, originFieldName, mapperField.fieldType, parseWithClassName, destinationFieldName));
+                    mapperImports.add(String.format(Tools.IMPORT_PATTERN, mapperField.originToDestinationParserPackageName, mapperField.originToDestinationParserClassName));
+                    mapperImports.add(String.format(Tools.IMPORT_PATTERN, mapperField.destinationToOriginParserPackageName, mapperField.destinationToOriginParserClassName));
+                    
+                    directFields.add(String.format(Tools.MAPPER_FIELD_WITH_PARSER_PATTERN, destinationFieldName, mapperField.originToDestinationParserClassName, originFieldName));
+                    inverseFields.add(String.format(Tools.MAPPER_FIELD_WITH_PARSER_PATTERN, originFieldName, mapperField.destinationToOriginParserClassName, destinationFieldName));
                 }
             }
 
@@ -288,8 +285,8 @@ public class AnnotationsProcessor extends AbstractProcessor {
         for (Element mappableElement : roundEnvironment.getElementsAnnotatedWith(Mappable.class)) {
             if (mappableElement.getKind() == ElementKind.CLASS) {
 
-                AnnotationMirror annotationMirror = getAnnotationMirror(mappableElement, Mappable.class);
-                AnnotationValue  annotationValue = getAnnotationValue(annotationMirror, "with");
+                AnnotationMirror mappableAnnotationMirror = getAnnotationMirror(mappableElement, Mappable.class);
+                AnnotationValue  annotationValue = getAnnotationValue(mappableAnnotationMirror, "with");
                 TypeElement linkedElement = getTypeElement(annotationValue);
 
                 ClassInfo mappableClassInfo = extractClassInformation(mappableElement);
@@ -306,23 +303,11 @@ public class AnnotationsProcessor extends AbstractProcessor {
             if (mappedElement.getKind() == ElementKind.FIELD) {
                 Mapped mappedAnnotation = mappedElement.getAnnotation(Mapped.class);
 
-                //region "Reading custom parsers configuration"
-
-                AnnotationMirror annotationMirror = getAnnotationMirror(mappedElement, Mapped.class);
-                AnnotationValue  annotationValue = getAnnotationValue(annotationMirror, "parseWith");
-                TypeElement parserWithElement = getTypeElement(annotationValue);
-                
-                ClassInfo parseWithClassInfo = new ClassInfo(AbstractTransformer.class.getPackage().getName(), AbstractParser.class.getSimpleName());
-                if (parserWithElement != null)
-                    parseWithClassInfo = extractClassInformation(parserWithElement);
-
-                //endregion
-                
                 String fieldName = mappedElement.getSimpleName().toString();
                 String fieldType = mappedElement.asType().toString();
                 String toFieldName = mappedAnnotation.toField();
 
-                MapperFieldInfo mappingFieldInfo = new MapperFieldInfo(fieldName, fieldType, toFieldName, parseWithClassInfo.packageName, parseWithClassInfo.className);
+                MapperFieldInfo mappingFieldInfo = new MapperFieldInfo(fieldName, fieldType, toFieldName);
 
                 ClassInfo classInfo = extractClassInformationFromField(mappedElement);
                 getMapper(classInfo)
@@ -332,6 +317,34 @@ public class AnnotationsProcessor extends AbstractProcessor {
         }
     }
 
+    private void processParseAnnotationElements() {
+        for (Element parseElement : roundEnvironment.getElementsAnnotatedWith(Parse.class)) {
+            if (parseElement.getKind() == ElementKind.FIELD) {
+
+                AnnotationMirror parseAnnotationMirror = getAnnotationMirror(parseElement, Parse.class);
+                AnnotationValue  originToDestinationWithValue = getAnnotationValue(parseAnnotationMirror, "originToDestinationWith");
+                AnnotationValue  destinationToOriginWithValue = getAnnotationValue(parseAnnotationMirror, "destinationToOriginWith");
+                TypeElement originToDestinationValue = getTypeElement(originToDestinationWithValue);
+                TypeElement destinationToOriginValue = getTypeElement(destinationToOriginWithValue);
+
+                String fieldName = parseElement.getSimpleName().toString();
+                ClassInfo ownerClass = extractClassInformationFromField(parseElement);
+                ClassInfo originToDestinationParserClass = extractClassInformation(originToDestinationValue);
+                ClassInfo destinationToOriginParserClass = extractClassInformation(destinationToOriginValue);
+
+                MapperFieldInfo mapperField = getMapper(ownerClass).getField(fieldName);
+                if (mapperField != null) {
+                    mapperField.originToDestinationParserPackageName = originToDestinationParserClass.packageName;
+                    mapperField.originToDestinationParserClassName = originToDestinationParserClass.className;
+                    mapperField.destinationToOriginParserPackageName = destinationToOriginParserClass.packageName;
+                    mapperField.destinationToOriginParserClassName = destinationToOriginParserClass.className;
+                } else {
+                    writeError(String.format("You have configured a @Parse annotation without a @Mapped annotation on %s.%s.", ownerClass.getFullName(), fieldName));
+                }
+            }
+        }
+    }
+    
     private boolean haveMapper(ClassInfo classInfo) {
         String mapperClassFullName = classInfo.getFullName();
         boolean result = mappersList.containsKey(mapperClassFullName);
@@ -402,6 +415,10 @@ public class AnnotationsProcessor extends AbstractProcessor {
         return result;
     }
 
+    private void writeError(String message) {
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message);
+    }
+    
     private void writeTrace(String message) {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, message);
     }
@@ -432,10 +449,21 @@ public class AnnotationsProcessor extends AbstractProcessor {
         public final String linkedPackageName;
         public final String mappableClassName;
 
-        private List<MapperFieldInfo> mappingsList = new ArrayList<>();
+        private List<MapperFieldInfo> mappedFieldsList = new ArrayList<>();
 
-        public List<MapperFieldInfo> getFields() { return mappingsList; }
+        public List<MapperFieldInfo> getFields() { return mappedFieldsList; }
 
+        public MapperFieldInfo getField(String fieldName) {
+            MapperFieldInfo result = null;
+            for (MapperFieldInfo field : mappedFieldsList) {
+                if (field.fieldName.equals(fieldName)){
+                    result = field;
+                    break;
+                }
+            }
+            return result;
+        }
+        
         public MapperInfo(String mappableClassName, String packageName, String className, String linkedPackageName, String linkedClassName) {
             super(packageName, className);
 
@@ -451,15 +479,15 @@ public class AnnotationsProcessor extends AbstractProcessor {
         public final String fieldName;
         public final String fieldType;
         public final String withFieldName;
-        public final String parseWithPackageName;
-        public final String parseWithClassName;
+        public String originToDestinationParserPackageName;
+        public String originToDestinationParserClassName;
+        public String destinationToOriginParserPackageName;
+        public String destinationToOriginParserClassName;
 
-        public MapperFieldInfo(String fieldName, String fieldType, String withFieldName, String parseWithPackageName, String parseWithClassName) {
+        public MapperFieldInfo(String fieldName, String fieldType, String withFieldName) {
             this.fieldName = fieldName;
             this.fieldType = fieldType;
             this.withFieldName = withFieldName;
-            this.parseWithPackageName = parseWithPackageName;
-            this.parseWithClassName = parseWithClassName;
         }
     }
 }

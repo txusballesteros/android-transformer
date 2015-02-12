@@ -16,13 +16,10 @@
 
 package com.mobandme.android.transformer;
 
-import com.mobandme.android.transformer.parser.AbstractParser;
-
 import java.lang.annotation.Target;
 import java.lang.annotation.Retention;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Objects;
 
 /**
  * Use this annotation to configure the data mapping between two fields.
@@ -37,10 +34,4 @@ public @interface Mapped {
      * @return
      */
     public String toField() default "";
-
-    /**
-     * Use this property to establish a specific data parser.
-     * @return
-     */
-    public Class<?> parseWith() default AbstractParser.class;
 }

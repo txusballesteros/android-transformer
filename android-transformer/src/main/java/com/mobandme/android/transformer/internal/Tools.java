@@ -37,5 +37,5 @@ public class Tools {
     public final static String MAPPER_CLASS_VAR_CONSTANT_PATTERN = "private final %s %s = new %s();";
     public final static String MAPPER_FIELD_PATTERN = "result.%s = data.%s;";
     public final static String MAPPER_FIELD_COMPOSITE_PATTERN = "result.%s = %s.transform(data.%s);";
-    public final static String MAPPER_FIELD__WITH_PARSER_PATTERN = "result.%s = (%s)new %s().parse(data.%s);";
+    public final static String MAPPER_FIELD_WITH_PARSER_PATTERN = "result.%s = new %s().parse(data.%s);";
 }

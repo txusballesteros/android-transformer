@@ -25,13 +25,14 @@
 
 package com.mobandme.sample.app.model;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import com.mobandme.android.transformer.Mappable;
 import com.mobandme.android.transformer.Mapped;
-import com.mobandme.android.transformer.ParseWith;
+import com.mobandme.android.transformer.Parse;
 import com.mobandme.sample.app.domain.Home;
-import com.mobandme.sample.app.model.parser.CalendarParser;
-
-import java.util.Calendar;
+import com.mobandme.sample.app.model.parser.CalendarToStringParser;
+import com.mobandme.sample.app.model.parser.StringToCalendarParser;
 
 @Mappable( with = Home.class )
 public class HomeModel {
@@ -50,17 +51,23 @@ public class HomeModel {
     @Mapped
     public String Country;
     
-    @Mapped(parseWith = CalendarParser.class)
+    @Mapped
+    @Parse (
+        originToDestinationWith = CalendarToStringParser.class,
+        destinationToOriginWith = StringToCalendarParser.class 
+    )
     public Calendar Date;
 
     @Override public String toString() {
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        
         return "HomeModel{" +
                 "Address='" + Address + '\'' +
                 ", HomeColor=" + HomeColor +
                 ", City='" + City + '\'' +
                 ", PostalCode='" + PostalCode + '\'' +
                 ", Country='" + Country + '\'' +
-                ", Date=" + Date +
+                ", Date=" + dateFormatter.format(Date.getTime()) +
                 '}';
     }
 }

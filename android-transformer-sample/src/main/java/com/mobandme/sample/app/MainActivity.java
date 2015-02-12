@@ -34,6 +34,8 @@ import com.mobandme.sample.app.domain.Home;
 import com.mobandme.sample.app.model.HomeColorModel;
 import com.mobandme.sample.app.model.HomeModel;
 
+import java.util.GregorianCalendar;
+
 public class MainActivity extends Activity {
 
     private static final String TAG = "MainActivity";
@@ -58,6 +60,7 @@ public class MainActivity extends Activity {
             homeModel.City = "Bilbao";
             homeModel.Country = "Spain";
             homeModel.PostalCode = "48903";
+            homeModel.Date = GregorianCalendar.getInstance();
             homeModel.HomeColor = new HomeColorModel();
             homeModel.HomeColor.colorHex = "#FF0000";
             homeModel.HomeColor.colorName = "Red";
@@ -76,8 +79,7 @@ public class MainActivity extends Activity {
 
             Log.d(TAG, homeDomain.toString());
             Log.d(TAG, homeModel.toString());
-            //Toast.makeText(this, String.format("Transformed %s --> %s", homeModel.getClass().getSimpleName(), homeDomain.getClass().getSimpleName()), Toast.LENGTH_SHORT).show();
-            
+
         } catch (Exception e) {
             Log.e("android-transformer", e.getMessage(), e);
         }

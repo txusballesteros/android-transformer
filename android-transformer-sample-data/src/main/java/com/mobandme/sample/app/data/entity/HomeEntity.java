@@ -37,4 +37,5 @@ public class HomeEntity {
     @Mapped public String City;
     @Mapped public String PostalCode;
     @Mapped public String Country;
+    @Mapped public String Date;
 }
