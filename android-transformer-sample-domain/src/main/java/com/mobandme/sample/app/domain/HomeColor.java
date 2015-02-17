@@ -22,26 +22,9 @@
  *
  * Contact: Txus Ballesteros <txus.ballesteros@gmail.com>
  */
+package com.mobandme.sample.app.domain;
 
-package com.mobandme.android.transformer.internal;
-
-import java.util.HashMap;
-
-public abstract class AbstractTransformer {
-    protected HashMap<String, Object> mapperList = new HashMap<>();
-    
-    public Object getMapper(Object value) {
-        Object result = null;
-        String classCanonicalName = value.getClass().getCanonicalName();
-        
-        if (mapperList.containsKey(classCanonicalName))
-            result = mapperList.get(classCanonicalName);
-        
-        return result;
-    }
-    
-    protected void addMapper(String classCanonicalName, Object mapper) {
-        if (!mapperList.containsKey(classCanonicalName))
-            mapperList.put(classCanonicalName, mapper);
-    }
+public class HomeColor {
+    public String colorName;
+    public String colorHex;
 }

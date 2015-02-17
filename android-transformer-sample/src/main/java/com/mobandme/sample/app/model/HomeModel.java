@@ -25,22 +25,41 @@
 
 package com.mobandme.sample.app.model;
 
-import com.mobandme.android.transformer.Mappable;
-import com.mobandme.android.transformer.Mapped;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
+import com.mobandme.android.transformer.compiler.Mappable;
+import com.mobandme.android.transformer.compiler.Mapped;
+import com.mobandme.android.transformer.compiler.Parse;
 import com.mobandme.sample.app.domain.Home;
+import com.mobandme.sample.app.model.parser.CalendarToStringParser;
+import com.mobandme.sample.app.model.parser.StringToCalendarParser;
 
 @Mappable( with = Home.class )
 public class HomeModel {
     
     @Mapped(toField = "PostalAddress") public String Address;
-    
-    @Mapped
-    public String City;
-    
-    @Mapped
-    public String PostalCode;
-    
-    @Mapped
-    public String Country;
-    
+    @Mapped public HomeColorModel HomeColor;
+    @Mapped public String City;
+    @Mapped public String PostalCode;
+    @Mapped public String Country;
+
+    @Parse(
+        originToDestinationWith = CalendarToStringParser.class,
+        destinationToOriginWith = StringToCalendarParser.class 
+    )
+    @Mapped public Calendar Date;
+
+    @Override public String toString() {
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        
+        return "HomeModel{" +
+                "Address='" + Address + '\'' +
+                ", HomeColor=" + HomeColor +
+                ", City='" + City + '\'' +
+                ", PostalCode='" + PostalCode + '\'' +
+                ", Country='" + Country + '\'' +
+                ", Date=" + dateFormatter.format(Date.getTime()) +
+                '}';
+    }
 }

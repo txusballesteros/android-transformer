@@ -23,10 +23,22 @@
  * Contact: Txus Ballesteros <txus.ballesteros@gmail.com>
  */
 
-package com.mobandme.sample.app.data;
+package com.mobandme.android.transformer.compiler;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Created by jbm on 27/1/15.
+ * Use this annotation to configure the custom data parser.
  */
-public class MyClass {
+
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.SOURCE)
+public @interface Parse {
+    
+    public Class<?> originToDestinationWith();
+    
+    public Class<?> destinationToOriginWith();
 }

@@ -22,17 +22,21 @@
  *
  * Contact: Txus Ballesteros <txus.ballesteros@gmail.com>
  */
+package com.mobandme.sample.app.model;
 
-package com.mobandme.android.transformer.internal;
+import com.mobandme.android.transformer.compiler.Mappable;
+import com.mobandme.android.transformer.compiler.Mapped;
+import com.mobandme.sample.app.domain.HomeColor;
 
-public class Tools {
-    public final static String PACKAGE_PATTERN = "package %s;";
-    public final static String CLASS_PATTERN = "public class %s {";
-    public final static String TRANSFORMER_CLASS_NAME = "Transformer";
-    public final static String TRANSFORMER_PACKAGE_PATTERN = "%s.transformer";
-    public final static String TRANSFORMER_CLASS_PATTERN = "public final class %s extends AbstractTransformer {";
-    public final static String IMPORT_PATTERN = "import %s.%s;";
-    public final static String MAPPER_PACKAGE_PATTERN = "%s.mapper";
-    public final static String MAPPER_CLASS_NAME_PATTERN = "%sMapper";
-    public final static String MAPPER_FIELD_PATTERN = "result.%s = data.%s;";
+@Mappable( with = HomeColor.class )
+public class HomeColorModel {
+    @Mapped public String colorName;
+    @Mapped public String colorHex;
+
+    @Override public String toString() {
+        return "HomeColorModel{" +
+                "colorName='" + colorName + '\'' +
+                ", colorHex='" + colorHex + '\'' +
+                '}';
+    }
 }

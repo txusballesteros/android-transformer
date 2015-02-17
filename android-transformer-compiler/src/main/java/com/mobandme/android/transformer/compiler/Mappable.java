@@ -23,11 +23,18 @@
  * Contact: Txus Ballesteros <txus.ballesteros@gmail.com>
  */
 
-package com.mobandme.android.transformer;
+package com.mobandme.android.transformer.compiler;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Use this annotation to configure you mappable objects.
  */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.SOURCE)
 public @interface Mappable {
 
     /**

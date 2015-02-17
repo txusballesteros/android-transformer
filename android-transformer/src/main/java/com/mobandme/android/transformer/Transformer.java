@@ -26,12 +26,9 @@
 package com.mobandme.android.transformer;
 
 import com.mobandme.android.transformer.internal.AbstractTransformer;
-import com.mobandme.android.transformer.internal.Tools;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Objects;
 
 public final class Transformer {
     public static class Builder {
@@ -49,8 +46,6 @@ public final class Transformer {
     private Transformer(Class<?> type) {
         this.transformerType = type;
     }
-
-
 
     /**
      * Use this method to transform your POJO object to the linked POJO object.
@@ -99,7 +94,7 @@ public final class Transformer {
     }
     
     private AbstractTransformer getTransformerInstance(String transformerCanonicalName) {
-        AbstractTransformer result = null;
+        AbstractTransformer result;
         
         try {
             
@@ -115,8 +110,7 @@ public final class Transformer {
     }
     
     private Object getMapperInstance(AbstractTransformer transformer, Object value) {
-        Object result = transformer.getMapper(value);
-        return result;
+        return transformer.getMapper(value);
     }
     
     private Object executeTransformation(Object mapper, Object value) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
