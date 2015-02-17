@@ -14,7 +14,8 @@ Add the library dependency to your build.gradle file.
 ```java
 dependencies {
     ...
-    compile 'com.mobandme:android-transformer:1.0.0'
+    compile 'com.mobandme:android-transformer:1.1.0'
+    provided 'com.mobandme:android-transformer-compiler:1.1.0'
 }
 ```
 
@@ -75,6 +76,59 @@ public class MainActivity extends Activity {
         HomeModel homeModel = homeModelTransformer.transform(home, HomeModel.class);
         ...
     }
+}
+```
+## Using Custom Parsers
+
+Imagine that you need make complex conversions between your objects, for example, you have a entity 
+on your model with a field of String type, and on the other hand you have a Calendar type field on your Domain objects. Now, you can
+ configure your customs data parsers and personalize this conversions.
+ 
+First, create your custom data parsers, IMPORTANT, you need the two ways data parsers, I mean, if you whant
+convert a String to a Calendar, you need a parser to conver Calendar to String.
+
+```java
+public class CalendarToStringParser extends AbstractParser<Calendar, String> {
+    
+    @Override
+    protected String onParse(Calendar value) {
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        return dateFormatter.format(value.getTime());
+    }
+}
+```
+
+```java
+public class StringToCalendarParser extends AbstractParser<String, Calendar> {
+    @Override
+    protected Calendar onParse(String value) {
+        Calendar calendar = GregorianCalendar.getInstance();
+
+        try {
+            SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+            calendar.setTime(dateFormatter.parse(value));
+        } catch (ParseException e) { }
+
+        return calendar;
+    }
+}
+```
+
+Now, you need configure this parsers into your fields.
+
+```java
+@Mappable( with = Home.class )
+public class HomeModel {
+
+    ...
+    
+    @Parse(
+        originToDestinationWith = CalendarToStringParser.class,
+        destinationToOriginWith = StringToCalendarParser.class
+    )
+    @Mapped public Calendar Date;
+    
+    ..
 }
 ```
 
