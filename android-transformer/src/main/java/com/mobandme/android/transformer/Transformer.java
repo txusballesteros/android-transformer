@@ -26,8 +26,6 @@
 package com.mobandme.android.transformer;
 
 import com.mobandme.android.transformer.internal.AbstractTransformer;
-import com.mobandme.android.transformer.internal.Tools;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

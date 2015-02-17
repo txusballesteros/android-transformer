@@ -25,7 +25,6 @@
 
 package com.mobandme.android.transformer.internal;
 
-
 import java.util.HashMap;
 
 public abstract class AbstractTransformer {

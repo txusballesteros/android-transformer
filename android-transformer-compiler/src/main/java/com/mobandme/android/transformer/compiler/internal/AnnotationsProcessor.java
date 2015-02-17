@@ -23,12 +23,19 @@
  * Contact: Txus Ballesteros <txus.ballesteros@gmail.com>
  */
 
-package com.mobandme.android.transformer.internal;
+package com.mobandme.android.transformer.compiler.internal;
 
-import com.mobandme.android.transformer.Mappable;
-import com.mobandme.android.transformer.Mapped;
-import com.mobandme.android.transformer.Parse;
-
+import com.mobandme.android.transformer.compiler.Mappable;
+import com.mobandme.android.transformer.compiler.Mapped;
+import com.mobandme.android.transformer.compiler.Parse;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
@@ -45,21 +52,13 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes({
-        "com.mobandme.android.transformer.Mapping",
-        "com.mobandme.android.transformer.Mappable",
-        "com.mobandme.android.transformer.Parse"
+        "com.mobandme.android.transformer.compiler.Mapping",
+        "com.mobandme.android.transformer.compiler.Mappable",
+        "com.mobandme.android.transformer.compiler.Parse"
 })
 public class AnnotationsProcessor extends AbstractProcessor {
 
@@ -347,8 +346,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
     
     private boolean haveMapper(ClassInfo classInfo) {
         String mapperClassFullName = classInfo.getFullName();
-        boolean result = mappersList.containsKey(mapperClassFullName);
-        return result;
+        return mappersList.containsKey(mapperClassFullName);
     }
 
     private MapperInfo createMapper(String mappableClassName, ClassInfo classInfo, ClassInfo linkedClassInfo) {
@@ -358,8 +356,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
     }
 
     private MapperInfo getMapper(ClassInfo classInfo) {
-        MapperInfo result = mappersList.get(classInfo.getFullName());
-        return result;
+        return mappersList.get(classInfo.getFullName());
     }
 
     private ClassInfo extractClassInformationFromField(Element element) {
@@ -385,13 +382,11 @@ public class AnnotationsProcessor extends AbstractProcessor {
                 break;
             }
         }
-
+        
         return result;
     }
 
     private AnnotationValue getAnnotationValue(AnnotationMirror annotation, String field) {
-        AnnotationValue result = null;
-
         if (annotation != null) {
             for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : annotation.getElementValues().entrySet()) {
                 if (entry.getKey().getSimpleName().toString().equals(field)) {
@@ -399,8 +394,8 @@ public class AnnotationsProcessor extends AbstractProcessor {
                 }
             }
         }
-
-        return result;
+        
+        return null;
     }
 
     private TypeElement getTypeElement(AnnotationValue value) {

@@ -23,7 +23,7 @@
  * Contact: Txus Ballesteros <txus.ballesteros@gmail.com>
  */
 
-package com.mobandme.android.transformer.internal;
+package com.mobandme.android.transformer.compiler.internal;
 
 public class Tools {
     public final static String PACKAGE_PATTERN = "package %s;";

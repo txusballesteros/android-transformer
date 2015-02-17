@@ -23,22 +23,22 @@
  * Contact: Txus Ballesteros <txus.ballesteros@gmail.com>
  */
 
-package com.mobandme.android.transformer;
+package com.mobandme.android.transformer.compiler;
 
-import java.lang.annotation.Target;
-import java.lang.annotation.Retention;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Use this annotation to configure the custom data parser.
+ * Use this annotation to configure you mappable objects.
  */
-
-@Target(ElementType.FIELD)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-public @interface Parse {
-    
-    public Class<?> originToDestinationWith();
-    
-    public Class<?> destinationToOriginWith();
+public @interface Mappable {
+
+    /**
+     * Use this property to establish the linked object type.
+     */
+    Class<?> with();
 }

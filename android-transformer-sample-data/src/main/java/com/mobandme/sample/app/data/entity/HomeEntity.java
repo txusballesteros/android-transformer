@@ -25,15 +25,14 @@
 
 package com.mobandme.sample.app.data.entity;
 
-import com.mobandme.android.transformer.Mappable;
-import com.mobandme.android.transformer.Mapped;
+import com.mobandme.android.transformer.compiler.Mappable;
+import com.mobandme.android.transformer.compiler.Mapped;
 import com.mobandme.sample.app.domain.Home;
 
 @Mappable( with = Home.class )
 public class HomeEntity {
 
     @Mapped(toField = "PostalAddress") public String Address;
-
     @Mapped public String City;
     @Mapped public String PostalCode;
     @Mapped public String Country;
