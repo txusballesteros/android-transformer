@@ -84,8 +84,8 @@ Imagine that you need make complex conversions between your objects, for example
 on your model with a field of String type, and on the other hand you have a Calendar type field on your Domain objects. Now, you can
  configure your customs data parsers and personalize this conversions.
  
-First, create your custom data parsers, IMPORTANT, you need the two ways data parsers, I mean, if you whant
-convert a String to a Calendar, you need a parser to conver Calendar to String.
+First, create your custom data parsers, IMPORTANT, you need the in-out data parsers, I mean, if you want
+convert a String to a Calendar, you need a parser to convert Calendar to String.
 
 ```java
 public class CalendarToStringParser extends AbstractParser<Calendar, String> {
