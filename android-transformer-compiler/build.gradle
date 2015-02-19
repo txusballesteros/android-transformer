@@ -16,11 +16,10 @@ apply plugin: 'apt'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
-// This is the library version used when deploying the artifact
-version = "1.1.0"
-group = "com.mobandme"                                                    // Maven Group ID for the artifact
-def siteUrl = 'https://github.com/txusballesteros/android-transformer'    // Homepage URL of the library
-def gitUrl = 'https://github.com/txusballesteros/android-transformer.git' // Git repository URL
+version = parent.ext.libraryVersion
+group = parent.ext.mavenGroupId
+def siteUrl = parent.ext.siteUrl
+def gitUrl = parent.ext.gitUrl
 
 Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())

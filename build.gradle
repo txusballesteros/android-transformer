@@ -10,6 +10,14 @@ buildscript {
 }
 
 allprojects {
+    allprojects {
+        ext {
+            libraryVersion = '1.1.1'
+            mavenGroupId = 'com.mobandme'   // Maven Group ID for the artifact
+            siteUrl = 'https://github.com/txusballesteros/android-transformer'
+            gitUrl = 'https://github.com/txusballesteros/android-transformer.git'
+        }
+    }
     repositories {
         jcenter()
     }

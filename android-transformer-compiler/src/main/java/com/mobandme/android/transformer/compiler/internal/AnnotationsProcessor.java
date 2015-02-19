@@ -75,7 +75,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
         processParseAnnotationElements();
         
         buildMapperObjects();
-        generateTransformerJavaFile();
+        generateTransformersJavaFiles();
 
         return true;
     }
@@ -206,73 +206,92 @@ public class AnnotationsProcessor extends AbstractProcessor {
         buffer.newLine();
         buffer.append("\t}");
     }
+
+    private void generateTransformersJavaFiles() {
+        Map<String, TransformerInfo> transformersList = new HashMap<>();
+        
+        if (mappersList.size() > 0) {
+            for (MapperInfo mapper : mappersList.values()) {
+                if (!transformersList.containsKey(mapper.packageName)) {
+                    String packageName = String.format(Tools.TRANSFORMER_PACKAGE_PATTERN, mapper.packageName);
+                    String className = Tools.TRANSFORMER_CLASS_NAME;
+                    TransformerInfo transformer = new TransformerInfo(packageName, className);
+                    transformersList.put(mapper.packageName, transformer);
+                }
+                
+                TransformerInfo transformer = transformersList.get(mapper.packageName);
+                transformer.getMappers().add(mapper);
+            }
+            
+            generateTransformerJavaFile(transformersList);
+        }
+    }
     
-    private void generateTransformerJavaFile() {
+    private void generateTransformerJavaFile(Map<String, TransformerInfo> transformers) {
         try {
 
-            if (mappersList.size() > 0) {
-                MapperInfo firstMapper = (MapperInfo)mappersList.values().toArray()[0];
+            if (transformers.size() > 0) {
+                for (TransformerInfo transformer : transformers.values()) {
+                    String packageName = transformer.packageName;
+                    String className = transformer.className;
 
-                String packageName = String.format(Tools.TRANSFORMER_PACKAGE_PATTERN, firstMapper.packageName);
-                String className = Tools.TRANSFORMER_CLASS_NAME;
+                    String transformerCanonicalName = String.format("%s.%s", packageName, className);
+                    writeTrace(String.format("Generating source file for Transformer class with name %s", transformerCanonicalName));
 
-                String transformerCanonicalName = String.format("%s.%s", packageName, className);
-                writeTrace(String.format("Generating source file for Transformer class with name %s", transformerCanonicalName));
+                    JavaFileObject javaFileObject = processingEnv.getFiler().createSourceFile(transformerCanonicalName);
+                    BufferedWriter buffer = new BufferedWriter(javaFileObject.openWriter());
 
-                JavaFileObject javaFileObject = processingEnv.getFiler().createSourceFile(transformerCanonicalName);
-                BufferedWriter buffer = new BufferedWriter(javaFileObject.openWriter());
+                    buffer.append(String.format(Tools.PACKAGE_PATTERN, packageName));
+                    buffer.newLine();
 
-                buffer.append(String.format(Tools.PACKAGE_PATTERN, packageName));
-                buffer.newLine();
-
-                //region "Class Imports Generation"
-
-                buffer.newLine();
-                buffer.append(String.format(Tools.IMPORT_PATTERN, "com.mobandme.android.transformer.internal", "AbstractTransformer"));
-                for (MapperInfo mapper : mappersList.values()) {
+                    //region "Class Imports Generation"
 
                     buffer.newLine();
-                    buffer.append(String.format(Tools.IMPORT_PATTERN, mapper.mapperPackageName, mapper.mapperClassName));
+                    buffer.append(String.format(Tools.IMPORT_PATTERN, "com.mobandme.android.transformer.internal", "AbstractTransformer"));
+                    for (MapperInfo mapper : transformer.getMappers()) {
+                        buffer.newLine();
+                        buffer.append(String.format(Tools.IMPORT_PATTERN, mapper.mapperPackageName, mapper.mapperClassName));
+                    }
+
+                    //endregion
+
+                    //region "Class Generation"
+
+                    buffer.newLine();
+                    buffer.newLine();
+                    buffer.append(String.format(Tools.TRANSFORMER_CLASS_PATTERN, className));
+
+                    //region "Constructor Generation"
+
+                    buffer.newLine();
+                    buffer.append(String.format("\tpublic %s() {", className));
+                    buffer.newLine();
+                    buffer.append("\t\tsuper();");
+
+                    //region "Variable Inicialization"
+
+                    buffer.newLine();
+                    for (MapperInfo mapper : transformer.getMappers()) {
+                        buffer.newLine();
+                        buffer.append(String.format("\t\taddMapper(\"%s.%s\", new %s());", mapper.packageName, mapper.className, mapper.mapperClassName));
+                        buffer.newLine();
+                        buffer.append(String.format("\t\taddMapper(\"%s.%s\", new %s());", mapper.linkedPackageName, mapper.linkedClassName, mapper.mapperClassName));
+                    }
+
+                    //endregion
+
+                    buffer.newLine();
+                    buffer.append("\t}");
+
+                    //endregion
+
+                    buffer.newLine();
+                    buffer.append("}");
+
+                    //endregion
+
+                    buffer.close();
                 }
-
-                //endregion
-
-                //region "Class Generation"
-
-                buffer.newLine();
-                buffer.newLine();
-                buffer.append(String.format(Tools.TRANSFORMER_CLASS_PATTERN, className));
-
-                //region "Constructor Generation"
-
-                buffer.newLine();
-                buffer.append(String.format("\tpublic %s() {", className));
-                buffer.newLine();
-                buffer.append("\t\tsuper();");
-
-                //region "Variable Inicialization"
-
-                buffer.newLine();
-                for (MapperInfo mapper : this.mappersList.values()) {
-                    buffer.newLine();
-                    buffer.append(String.format("\t\taddMapper(\"%s.%s\", new %s());", mapper.packageName, mapper.className, mapper.mapperClassName));
-                    buffer.newLine();
-                    buffer.append(String.format("\t\taddMapper(\"%s.%s\", new %s());", mapper.linkedPackageName, mapper.linkedClassName, mapper.mapperClassName));
-                }
-
-                //endregion
-
-                buffer.newLine();
-                buffer.append("\t}");
-
-                //endregion
-
-                buffer.newLine();
-                buffer.append("}");
-
-                //endregion
-
-                buffer.close();
             }
 
         } catch (IOException error) {
@@ -437,6 +456,19 @@ public class AnnotationsProcessor extends AbstractProcessor {
         }
     }
 
+    private class TransformerInfo extends ClassInfo {
+        private List<MapperInfo> mappers;
+       
+        public List<MapperInfo> getMappers() {
+            return mappers;     
+        }
+        
+        public TransformerInfo(String packageName, String className) {
+            super(packageName, className);
+            mappers = new ArrayList<>();
+        }
+    }
+    
     private class MapperInfo extends ClassInfo {
         public final String mapperClassName;
         public final String mapperPackageName;
