@@ -93,19 +93,21 @@ public class AnnotationsProcessor extends AbstractProcessor {
             mapperImports.add(String.format(Tools.IMPORT_PATTERN, mapper.linkedPackageName, mapper.linkedClassName));
 
             for (MapperFieldInfo mapperField : mapper.getFields()) {
-                String originFieldName = mapperField.fieldName;
+                String originFieldName = toUpperCamelCase(mapperField.fieldName);
                 String destinationFieldName = mapperField.fieldName;
 
                 if (mapperField.withFieldName != null && !mapperField.withFieldName.trim().equals(""))
                     destinationFieldName = mapperField.withFieldName;
 
+                destinationFieldName = toUpperCamelCase(destinationFieldName);
+
                 if (mapperField.originToDestinationParserClassName == null && mapperField.destinationToOriginParserClassName == null) {
                     MapperInfo mapperInfo = mapperForMapperField(mapperField);
                     if (mapperInfo != null) {
                         mapperImports.add(String.format(Tools.IMPORT_PATTERN, mapperInfo.mapperPackageName, mapperInfo.mapperClassName));
-                        classVars.add(String.format(Tools.MAPPER_CLASS_VAR_CONSTANT_PATTERN, mapperInfo.mapperClassName, toCamelCase(mapperInfo.mapperClassName), mapperInfo.mapperClassName));
-                        directFields.add(String.format(Tools.MAPPER_FIELD_COMPOSITE_PATTERN, destinationFieldName, toCamelCase(mapperInfo.mapperClassName), originFieldName));
-                        inverseFields.add(String.format(Tools.MAPPER_FIELD_COMPOSITE_PATTERN, originFieldName, toCamelCase(mapperInfo.mapperClassName), destinationFieldName));
+                        classVars.add(String.format(Tools.MAPPER_CLASS_VAR_CONSTANT_PATTERN, mapperInfo.mapperClassName, toLowerCamelCase(mapperInfo.mapperClassName), mapperInfo.mapperClassName));
+                        directFields.add(String.format(Tools.MAPPER_FIELD_COMPOSITE_PATTERN, destinationFieldName, toLowerCamelCase(mapperInfo.mapperClassName), originFieldName));
+                        inverseFields.add(String.format(Tools.MAPPER_FIELD_COMPOSITE_PATTERN, originFieldName, toLowerCamelCase(mapperInfo.mapperClassName), destinationFieldName));
                     } else {
                         directFields.add(String.format(Tools.MAPPER_FIELD_PATTERN, destinationFieldName, originFieldName));
                         inverseFields.add(String.format(Tools.MAPPER_FIELD_PATTERN, originFieldName, destinationFieldName));
@@ -132,8 +134,12 @@ public class AnnotationsProcessor extends AbstractProcessor {
         return null;
     }
 
-    private String toCamelCase(String className) {
-        return className.substring(0, 1).toLowerCase() + className.substring(1);
+    private String toLowerCamelCase(String className) {
+        return className.substring(0, 1).toLowerCase().concat(className.substring(1));
+    }
+
+    private String toUpperCamelCase(String fielName){
+        return fielName.substring(0, 1).toUpperCase().concat(fielName.substring(1));
     }
 
     private void generateMapperJavaFile(MapperInfo mapper, Collection<String> classVars, Collection<String> imports, Collection<String> directFields, Collection<String> inverseFields) {

@@ -32,4 +32,52 @@ public class Home {
     public String Country;
     public String Date;
     public HomeColor HomeColor;
+
+    public String getPostalAddress() {
+        return PostalAddress;
+    }
+
+    public void setPostalAddress(String postalAddress) {
+        PostalAddress = postalAddress;
+    }
+
+    public String getCity() {
+        return City;
+    }
+
+    public void setCity(String city) {
+        City = city;
+    }
+
+    public String getPostalCode() {
+        return PostalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        PostalCode = postalCode;
+    }
+
+    public String getCountry() {
+        return Country;
+    }
+
+    public void setCountry(String country) {
+        Country = country;
+    }
+
+    public String getDate() {
+        return Date;
+    }
+
+    public void setDate(String date) {
+        Date = date;
+    }
+
+    public HomeColor getHomeColor() {
+        return HomeColor;
+    }
+
+    public void setHomeColor(HomeColor homeColor) {
+        HomeColor = homeColor;
+    }
 }

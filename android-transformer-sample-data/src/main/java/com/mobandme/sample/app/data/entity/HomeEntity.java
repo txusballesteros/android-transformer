@@ -37,4 +37,44 @@ public class HomeEntity {
     @Mapped public String PostalCode;
     @Mapped public String Country;
     @Mapped public String Date;
+
+    public String getAddress() {
+        return Address;
+    }
+
+    public void setAddress(String address) {
+        Address = address;
+    }
+
+    public String getCity() {
+        return City;
+    }
+
+    public void setCity(String city) {
+        City = city;
+    }
+
+    public String getPostalCode() {
+        return PostalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        PostalCode = postalCode;
+    }
+
+    public String getCountry() {
+        return Country;
+    }
+
+    public void setCountry(String country) {
+        Country = country;
+    }
+
+    public String getDate() {
+        return Date;
+    }
+
+    public void setDate(String date) {
+        Date = date;
+    }
 }

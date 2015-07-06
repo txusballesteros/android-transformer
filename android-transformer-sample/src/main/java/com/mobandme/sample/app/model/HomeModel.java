@@ -50,6 +50,54 @@ public class HomeModel {
     )
     @Mapped public Calendar Date;
 
+    public String getAddress() {
+        return Address;
+    }
+
+    public void setAddress(String address) {
+        Address = address;
+    }
+
+    public HomeColorModel getHomeColor() {
+        return HomeColor;
+    }
+
+    public void setHomeColor(HomeColorModel homeColor) {
+        HomeColor = homeColor;
+    }
+
+    public String getCity() {
+        return City;
+    }
+
+    public void setCity(String city) {
+        City = city;
+    }
+
+    public String getPostalCode() {
+        return PostalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        PostalCode = postalCode;
+    }
+
+    public String getCountry() {
+        return Country;
+    }
+
+    public void setCountry(String country) {
+        Country = country;
+    }
+
+    public Calendar getDate() {
+        return Date;
+    }
+
+    public void setDate(Calendar date) {
+        Date = date;
+    }
+
     @Override public String toString() {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         
