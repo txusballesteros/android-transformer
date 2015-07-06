@@ -43,6 +43,10 @@ class HomeModel {
     @Mapped ( toField = "PostalCode")
     public String CityCode;
     ...
+
+    //Getters and Setters
+
+    ...
 }
 ```
 
@@ -52,6 +56,10 @@ class Home {
     public String Address;
     
     public String PostalCode;
+    ...
+
+    //Getters and Setters
+
     ...
 }
 ```
@@ -135,7 +143,11 @@ public class HomeModel {
     )
     @Mapped public Calendar Date;
     
-    ..
+    ...
+
+    //Getters and Setters
+
+    ...
 }
 ```
 
