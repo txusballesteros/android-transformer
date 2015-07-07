@@ -43,6 +43,7 @@ public class HomeModel {
     @Mapped public String City;
     @Mapped public String PostalCode;
     @Mapped public String Country;
+    @Mapped public boolean Flat;
 
     @Parse(
         originToDestinationWith = CalendarToStringParser.class,
@@ -98,6 +99,14 @@ public class HomeModel {
         Date = date;
     }
 
+    public boolean isFlat() {
+        return Flat;
+    }
+
+    public void setFlat(boolean flat) {
+        Flat = flat;
+    }
+
     @Override public String toString() {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         
@@ -107,6 +116,7 @@ public class HomeModel {
                 ", City='" + City + '\'' +
                 ", PostalCode='" + PostalCode + '\'' +
                 ", Country='" + Country + '\'' +
+                ", Flat=" + Flat +
                 ", Date=" + dateFormatter.format(Date.getTime()) +
                 '}';
     }

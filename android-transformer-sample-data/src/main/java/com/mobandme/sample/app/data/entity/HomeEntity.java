@@ -37,6 +37,7 @@ public class HomeEntity {
     @Mapped public String PostalCode;
     @Mapped public String Country;
     @Mapped public String Date;
+    @Mapped public boolean Flat;
 
     public String getAddress() {
         return Address;
@@ -76,5 +77,13 @@ public class HomeEntity {
 
     public void setDate(String date) {
         Date = date;
+    }
+
+    public boolean isFlat() {
+        return Flat;
+    }
+
+    public void setFlat(boolean flat) {
+        Flat = flat;
     }
 }

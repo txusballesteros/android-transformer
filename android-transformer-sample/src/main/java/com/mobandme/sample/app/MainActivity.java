@@ -64,6 +64,7 @@ public class MainActivity extends Activity {
             homeModel.HomeColor = new HomeColorModel();
             homeModel.HomeColor.colorHex = "#FF0000";
             homeModel.HomeColor.colorName = "Red";
+            homeModel.Flat = false;
 
             Home homeDomain = null;
             HomeEntity homeEntity = null;

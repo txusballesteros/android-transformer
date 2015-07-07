@@ -32,6 +32,7 @@ public class Home {
     public String Country;
     public String Date;
     public HomeColor HomeColor;
+    public boolean Flat;
 
     public String getPostalAddress() {
         return PostalAddress;
@@ -79,5 +80,26 @@ public class Home {
 
     public void setHomeColor(HomeColor homeColor) {
         HomeColor = homeColor;
+    }
+
+    public boolean isFlat() {
+        return Flat;
+    }
+
+    public void setFlat(boolean flat) {
+        Flat = flat;
+    }
+
+    @Override
+    public String toString() {
+        return "Home{" +
+                "PostalAddress='" + PostalAddress + '\'' +
+                ", City='" + City + '\'' +
+                ", PostalCode='" + PostalCode + '\'' +
+                ", Country='" + Country + '\'' +
+                ", Date='" + Date + '\'' +
+                ", HomeColor=" + HomeColor +
+                ", Flat=" + Flat +
+                '}';
     }
 }

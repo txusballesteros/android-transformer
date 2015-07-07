@@ -65,6 +65,9 @@ public class AnnotationsProcessor extends AbstractProcessor {
     RoundEnvironment roundEnvironment;
     Map<String, MapperInfo> mappersList;
 
+    final String BOOLEAN_FIELD_PREFIX = "is";
+    final String SOME_FIELD_PREFIX = "get";
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         roundEnvironment = roundEnv;
@@ -78,6 +81,22 @@ public class AnnotationsProcessor extends AbstractProcessor {
         generateTransformersJavaFiles();
 
         return true;
+    }
+
+    private String returnedFieldPrefix(MapperFieldInfo mapperField, String fieldName){
+        String result;
+
+        if (mapperField.fieldType.equals("boolean")){
+            if (fieldName.toLowerCase().startsWith(BOOLEAN_FIELD_PREFIX)){
+                result = toLowerCamelCase(fieldName);
+            }else{
+                result = BOOLEAN_FIELD_PREFIX.concat(fieldName);
+            }
+        }else{
+            result = SOME_FIELD_PREFIX.concat(fieldName);
+        }
+
+        return result;
     }
 
     private void buildMapperObjects() {
@@ -106,18 +125,18 @@ public class AnnotationsProcessor extends AbstractProcessor {
                     if (mapperInfo != null) {
                         mapperImports.add(String.format(Tools.IMPORT_PATTERN, mapperInfo.mapperPackageName, mapperInfo.mapperClassName));
                         classVars.add(String.format(Tools.MAPPER_CLASS_VAR_CONSTANT_PATTERN, mapperInfo.mapperClassName, toLowerCamelCase(mapperInfo.mapperClassName), mapperInfo.mapperClassName));
-                        directFields.add(String.format(Tools.MAPPER_FIELD_COMPOSITE_PATTERN, destinationFieldName, toLowerCamelCase(mapperInfo.mapperClassName), originFieldName));
-                        inverseFields.add(String.format(Tools.MAPPER_FIELD_COMPOSITE_PATTERN, originFieldName, toLowerCamelCase(mapperInfo.mapperClassName), destinationFieldName));
+                        directFields.add(String.format(Tools.MAPPER_FIELD_COMPOSITE_PATTERN, destinationFieldName, toLowerCamelCase(mapperInfo.mapperClassName), returnedFieldPrefix(mapperField, originFieldName)));
+                        inverseFields.add(String.format(Tools.MAPPER_FIELD_COMPOSITE_PATTERN, originFieldName, toLowerCamelCase(mapperInfo.mapperClassName), returnedFieldPrefix(mapperField, destinationFieldName)));
                     } else {
-                        directFields.add(String.format(Tools.MAPPER_FIELD_PATTERN, destinationFieldName, originFieldName));
-                        inverseFields.add(String.format(Tools.MAPPER_FIELD_PATTERN, originFieldName, destinationFieldName));
+                        directFields.add(String.format(Tools.MAPPER_FIELD_PATTERN, destinationFieldName, returnedFieldPrefix(mapperField, originFieldName)));
+                        inverseFields.add(String.format(Tools.MAPPER_FIELD_PATTERN, originFieldName, returnedFieldPrefix(mapperField, destinationFieldName)));
                     }
                 } else {
                     mapperImports.add(String.format(Tools.IMPORT_PATTERN, mapperField.originToDestinationParserPackageName, mapperField.originToDestinationParserClassName));
                     mapperImports.add(String.format(Tools.IMPORT_PATTERN, mapperField.destinationToOriginParserPackageName, mapperField.destinationToOriginParserClassName));
-                    
-                    directFields.add(String.format(Tools.MAPPER_FIELD_WITH_PARSER_PATTERN, destinationFieldName, mapperField.originToDestinationParserClassName, originFieldName));
-                    inverseFields.add(String.format(Tools.MAPPER_FIELD_WITH_PARSER_PATTERN, originFieldName, mapperField.destinationToOriginParserClassName, destinationFieldName));
+
+                    directFields.add(String.format(Tools.MAPPER_FIELD_WITH_PARSER_PATTERN, destinationFieldName, mapperField.originToDestinationParserClassName, returnedFieldPrefix(mapperField, originFieldName)));
+                    inverseFields.add(String.format(Tools.MAPPER_FIELD_WITH_PARSER_PATTERN, originFieldName, mapperField.destinationToOriginParserClassName, returnedFieldPrefix(mapperField, destinationFieldName)));
                 }
             }
 
