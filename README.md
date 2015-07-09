@@ -44,9 +44,6 @@ class HomeModel {
     public String CityCode;
     ...
 
-    //Getters and Setters
-
-    ...
 }
 ```
 
@@ -58,9 +55,6 @@ class Home {
     public String PostalCode;
     ...
 
-    //Getters and Setters
-
-    ...
 }
 ```
 And now you will can make your object conversion.
@@ -144,10 +138,7 @@ public class HomeModel {
     @Mapped public Calendar Date;
     
     ...
-
-    //Getters and Setters
-
-    ...
+    
 }
 ```
 

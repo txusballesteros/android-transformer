@@ -25,9 +25,6 @@
 
 package com.mobandme.sample.app.model;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import com.mobandme.android.transformer.compiler.Mappable;
 import com.mobandme.android.transformer.compiler.Mapped;
 import com.mobandme.android.transformer.compiler.Parse;
@@ -35,7 +32,10 @@ import com.mobandme.sample.app.domain.Home;
 import com.mobandme.sample.app.model.parser.CalendarToStringParser;
 import com.mobandme.sample.app.model.parser.StringToCalendarParser;
 
-@Mappable( with = Home.class )
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
+@Mappable( with = Home.class)
 public class HomeModel {
     
     @Mapped(toField = "PostalAddress") public String Address;
@@ -43,69 +43,12 @@ public class HomeModel {
     @Mapped public String City;
     @Mapped public String PostalCode;
     @Mapped public String Country;
-    @Mapped public boolean Flat;
 
     @Parse(
         originToDestinationWith = CalendarToStringParser.class,
         destinationToOriginWith = StringToCalendarParser.class 
     )
     @Mapped public Calendar Date;
-
-    public String getAddress() {
-        return Address;
-    }
-
-    public void setAddress(String address) {
-        Address = address;
-    }
-
-    public HomeColorModel getHomeColor() {
-        return HomeColor;
-    }
-
-    public void setHomeColor(HomeColorModel homeColor) {
-        HomeColor = homeColor;
-    }
-
-    public String getCity() {
-        return City;
-    }
-
-    public void setCity(String city) {
-        City = city;
-    }
-
-    public String getPostalCode() {
-        return PostalCode;
-    }
-
-    public void setPostalCode(String postalCode) {
-        PostalCode = postalCode;
-    }
-
-    public String getCountry() {
-        return Country;
-    }
-
-    public void setCountry(String country) {
-        Country = country;
-    }
-
-    public Calendar getDate() {
-        return Date;
-    }
-
-    public void setDate(Calendar date) {
-        Date = date;
-    }
-
-    public boolean isFlat() {
-        return Flat;
-    }
-
-    public void setFlat(boolean flat) {
-        Flat = flat;
-    }
 
     @Override public String toString() {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -116,7 +59,6 @@ public class HomeModel {
                 ", City='" + City + '\'' +
                 ", PostalCode='" + PostalCode + '\'' +
                 ", Country='" + Country + '\'' +
-                ", Flat=" + Flat +
                 ", Date=" + dateFormatter.format(Date.getTime()) +
                 '}';
     }

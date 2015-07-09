@@ -28,10 +28,10 @@ import com.mobandme.android.transformer.compiler.Mappable;
 import com.mobandme.android.transformer.compiler.Mapped;
 import com.mobandme.sample.app.domain.HomeColor;
 
-@Mappable( with = HomeColor.class )
+@Mappable( with = HomeColor.class)
 public class HomeColorModel {
-    @Mapped public String colorName;
-    @Mapped public String colorHex;
+    @Mapped private String colorName;
+    @Mapped private String colorHex;
 
     public String getColorName() {
         return colorName;

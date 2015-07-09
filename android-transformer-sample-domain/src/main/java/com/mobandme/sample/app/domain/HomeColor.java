@@ -25,8 +25,8 @@
 package com.mobandme.sample.app.domain;
 
 public class HomeColor {
-    public String colorName;
-    public String colorHex;
+    private String colorName;
+    private String colorHex;
 
     public String getColorName() {
         return colorName;

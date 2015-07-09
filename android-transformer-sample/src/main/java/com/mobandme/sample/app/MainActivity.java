@@ -62,9 +62,8 @@ public class MainActivity extends Activity {
             homeModel.PostalCode = "48903";
             homeModel.Date = GregorianCalendar.getInstance();
             homeModel.HomeColor = new HomeColorModel();
-            homeModel.HomeColor.colorHex = "#FF0000";
-            homeModel.HomeColor.colorName = "Red";
-            homeModel.Flat = false;
+            homeModel.HomeColor.setColorHex("#FF0000");
+            homeModel.HomeColor.setColorName("Red");
 
             Home homeDomain = null;
             HomeEntity homeEntity = null;
