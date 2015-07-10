@@ -28,6 +28,7 @@ package com.mobandme.android.transformer.compiler.internal;
 import com.mobandme.android.transformer.compiler.Mappable;
 import com.mobandme.android.transformer.compiler.Mapped;
 import com.mobandme.android.transformer.compiler.Parse;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
@@ -46,6 +48,7 @@ import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -62,6 +65,9 @@ import javax.tools.JavaFileObject;
 })
 public class AnnotationsProcessor extends AbstractProcessor {
 
+    final String BOOLEAN_FIELD_PREFIX = "is";
+    final String SOME_FIELD_PREFIX = "get";
+
     RoundEnvironment roundEnvironment;
     Map<String, MapperInfo> mappersList;
 
@@ -73,7 +79,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
         processMappableAnnotationElements();
         processMappedAnnotationElements();
         processParseAnnotationElements();
-        
+
         buildMapperObjects();
         generateTransformersJavaFiles();
 
@@ -99,28 +105,73 @@ public class AnnotationsProcessor extends AbstractProcessor {
                 if (mapperField.withFieldName != null && !mapperField.withFieldName.trim().equals(""))
                     destinationFieldName = mapperField.withFieldName;
 
+                if (!mapperField.isPublicField) {
+                    destinationFieldName = toUpperCamelCase(destinationFieldName);
+                    originFieldName = toUpperCamelCase(originFieldName);
+                }
+
                 if (mapperField.originToDestinationParserClassName == null && mapperField.destinationToOriginParserClassName == null) {
                     MapperInfo mapperInfo = mapperForMapperField(mapperField);
                     if (mapperInfo != null) {
                         mapperImports.add(String.format(Tools.IMPORT_PATTERN, mapperInfo.mapperPackageName, mapperInfo.mapperClassName));
-                        classVars.add(String.format(Tools.MAPPER_CLASS_VAR_CONSTANT_PATTERN, mapperInfo.mapperClassName, toCamelCase(mapperInfo.mapperClassName), mapperInfo.mapperClassName));
-                        directFields.add(String.format(Tools.MAPPER_FIELD_COMPOSITE_PATTERN, destinationFieldName, toCamelCase(mapperInfo.mapperClassName), originFieldName));
-                        inverseFields.add(String.format(Tools.MAPPER_FIELD_COMPOSITE_PATTERN, originFieldName, toCamelCase(mapperInfo.mapperClassName), destinationFieldName));
+                        classVars.add(String.format(Tools.MAPPER_CLASS_VAR_CONSTANT_PATTERN, mapperInfo.mapperClassName, toLowerCamelCase(mapperInfo.mapperClassName), mapperInfo.mapperClassName));
+
+                        String mapperCompositePattern = getMapperCompositePattern(mapperField);
+                        directFields.add(String.format(mapperCompositePattern, destinationFieldName, toLowerCamelCase(mapperInfo.mapperClassName), returnedFieldPrefix(mapperField, originFieldName)));
+                        inverseFields.add(String.format(mapperCompositePattern, originFieldName, toLowerCamelCase(mapperInfo.mapperClassName), returnedFieldPrefix(mapperField, destinationFieldName)));
                     } else {
-                        directFields.add(String.format(Tools.MAPPER_FIELD_PATTERN, destinationFieldName, originFieldName));
-                        inverseFields.add(String.format(Tools.MAPPER_FIELD_PATTERN, originFieldName, destinationFieldName));
+                        String mapperFieldPattern = getMapperFieldPattern(mapperField);
+                        directFields.add(String.format(mapperFieldPattern, destinationFieldName, returnedFieldPrefix(mapperField, originFieldName)));
+                        inverseFields.add(String.format(mapperFieldPattern, originFieldName, returnedFieldPrefix(mapperField, destinationFieldName)));
                     }
                 } else {
                     mapperImports.add(String.format(Tools.IMPORT_PATTERN, mapperField.originToDestinationParserPackageName, mapperField.originToDestinationParserClassName));
                     mapperImports.add(String.format(Tools.IMPORT_PATTERN, mapperField.destinationToOriginParserPackageName, mapperField.destinationToOriginParserClassName));
-                    
-                    directFields.add(String.format(Tools.MAPPER_FIELD_WITH_PARSER_PATTERN, destinationFieldName, mapperField.originToDestinationParserClassName, originFieldName));
-                    inverseFields.add(String.format(Tools.MAPPER_FIELD_WITH_PARSER_PATTERN, originFieldName, mapperField.destinationToOriginParserClassName, destinationFieldName));
+
+                    String mapperFieldWithParserPattern = getMapperFieldWithParserPattern(mapperField);
+                    directFields.add(String.format(mapperFieldWithParserPattern, destinationFieldName, mapperField.originToDestinationParserClassName, returnedFieldPrefix(mapperField, originFieldName)));
+                    inverseFields.add(String.format(mapperFieldWithParserPattern, originFieldName, mapperField.destinationToOriginParserClassName, returnedFieldPrefix(mapperField, destinationFieldName)));
                 }
             }
 
             generateMapperJavaFile(mapper, classVars, mapperImports, directFields, inverseFields);
         }
+    }
+
+    private String getMapperCompositePattern(MapperFieldInfo mapperField){
+        String result;
+
+        if (mapperField.isPublicField){
+            result = Tools.MAPPER_FIELD_COMPOSITE_PATTERN;
+        }else {
+            result = Tools.MAPPER_STANDARD_FIELD_COMPOSITE_PATTERN;
+        }
+
+        return result;
+    }
+
+    private String getMapperFieldWithParserPattern(MapperFieldInfo mapperField){
+        String result;
+
+        if (mapperField.isPublicField){
+            result = Tools.MAPPER_FIELD_WITH_PARSER_PATTERN;
+        }else {
+            result = Tools.MAPPER_STANDARD_FIELD_WITH_PARSER_PATTERN;
+        }
+
+        return result;
+    }
+
+    private String getMapperFieldPattern(MapperFieldInfo mapperField){
+        String result;
+
+        if (mapperField.isPublicField){
+            result = Tools.MAPPER_FIELD_PATTERN;
+        }else {
+            result = Tools.MAPPER_STANDARD_FIELD_PATTERN;
+        }
+
+        return result;
     }
 
     private MapperInfo mapperForMapperField(MapperFieldInfo mapperField) {
@@ -132,8 +183,35 @@ public class AnnotationsProcessor extends AbstractProcessor {
         return null;
     }
 
-    private String toCamelCase(String className) {
-        return className.substring(0, 1).toLowerCase() + className.substring(1);
+    private String toLowerCamelCase(String className) {
+        return className.substring(0, 1).toLowerCase().concat(className.substring(1));
+    }
+
+    private String toUpperCamelCase(String fielName){
+        return fielName.substring(0, 1).toUpperCase().concat(fielName.substring(1));
+    }
+
+    private String returnedFieldPrefix(MapperFieldInfo mapperField, String fieldName){
+        if (mapperField.isPublicField)
+            return fieldName;
+
+        return returnedFieldPrefix(mapperField.fieldType, fieldName);
+    }
+
+    private String returnedFieldPrefix(String fieldType, String fieldName){
+        String result;
+
+        if (fieldType.equals("boolean")){
+            if (fieldName.toLowerCase().startsWith(BOOLEAN_FIELD_PREFIX)){
+                result = toLowerCamelCase(fieldName);
+            }else{
+                result = BOOLEAN_FIELD_PREFIX.concat(fieldName);
+            }
+        }else{
+            result = SOME_FIELD_PREFIX.concat(fieldName);
+        }
+
+        return result;
     }
 
     private void generateMapperJavaFile(MapperInfo mapper, Collection<String> classVars, Collection<String> imports, Collection<String> directFields, Collection<String> inverseFields) {
@@ -323,9 +401,10 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
                 String fieldName = mappedElement.getSimpleName().toString();
                 String fieldType = mappedElement.asType().toString();
+                boolean isPublicField = mappedElement.getModifiers().contains(Modifier.PUBLIC);
                 String toFieldName = mappedAnnotation.toField();
 
-                MapperFieldInfo mappingFieldInfo = new MapperFieldInfo(fieldName, fieldType, toFieldName);
+                MapperFieldInfo mappingFieldInfo = new MapperFieldInfo(fieldName, fieldType, toFieldName, isPublicField);
 
                 ClassInfo classInfo = extractClassInformationFromField(mappedElement);
                 getMapper(classInfo)
@@ -362,7 +441,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
             }
         }
     }
-    
+
     private boolean haveMapper(ClassInfo classInfo) {
         String mapperClassFullName = classInfo.getFullName();
         return mappersList.containsKey(mapperClassFullName);
@@ -506,15 +585,17 @@ public class AnnotationsProcessor extends AbstractProcessor {
         public final String fieldName;
         public final String fieldType;
         public final String withFieldName;
+        public final boolean isPublicField;
         public String originToDestinationParserPackageName;
         public String originToDestinationParserClassName;
         public String destinationToOriginParserPackageName;
         public String destinationToOriginParserClassName;
 
-        public MapperFieldInfo(String fieldName, String fieldType, String withFieldName) {
+        public MapperFieldInfo(String fieldName, String fieldType, String withFieldName, boolean isPublicField) {
             this.fieldName = fieldName;
             this.fieldType = fieldType;
             this.withFieldName = withFieldName;
+            this.isPublicField = isPublicField;
         }
     }
 }

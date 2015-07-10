@@ -29,7 +29,7 @@ import com.mobandme.android.transformer.compiler.Mappable;
 import com.mobandme.android.transformer.compiler.Mapped;
 import com.mobandme.sample.app.domain.Home;
 
-@Mappable( with = Home.class )
+@Mappable( with = Home.class)
 public class HomeEntity {
 
     @Mapped(toField = "PostalAddress") public String Address;

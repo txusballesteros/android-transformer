@@ -25,9 +25,6 @@
 
 package com.mobandme.sample.app.model;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import com.mobandme.android.transformer.compiler.Mappable;
 import com.mobandme.android.transformer.compiler.Mapped;
 import com.mobandme.android.transformer.compiler.Parse;
@@ -35,7 +32,10 @@ import com.mobandme.sample.app.domain.Home;
 import com.mobandme.sample.app.model.parser.CalendarToStringParser;
 import com.mobandme.sample.app.model.parser.StringToCalendarParser;
 
-@Mappable( with = Home.class )
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
+@Mappable( with = Home.class)
 public class HomeModel {
     
     @Mapped(toField = "PostalAddress") public String Address;

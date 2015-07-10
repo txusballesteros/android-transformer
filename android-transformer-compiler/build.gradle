@@ -16,6 +16,10 @@ apply plugin: 'apt'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
+
+
 version = parent.ext.libraryVersion
 group = parent.ext.mavenGroupId
 def siteUrl = parent.ext.siteUrl
