@@ -28,10 +28,26 @@ import com.mobandme.android.transformer.compiler.Mappable;
 import com.mobandme.android.transformer.compiler.Mapped;
 import com.mobandme.sample.app.domain.HomeColor;
 
-@Mappable( with = HomeColor.class )
+@Mappable( with = HomeColor.class)
 public class HomeColorModel {
-    @Mapped public String colorName;
-    @Mapped public String colorHex;
+    @Mapped private String colorName;
+    @Mapped private String colorHex;
+
+    public String getColorName() {
+        return colorName;
+    }
+
+    public void setColorName(String colorName) {
+        this.colorName = colorName;
+    }
+
+    public String getColorHex() {
+        return colorHex;
+    }
+
+    public void setColorHex(String colorHex) {
+        this.colorHex = colorHex;
+    }
 
     @Override public String toString() {
         return "HomeColorModel{" +
