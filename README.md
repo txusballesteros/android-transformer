@@ -14,8 +14,8 @@ Add the library dependency to your build.gradle file.
 ```java
 dependencies {
     ...
-    compile 'com.mobandme:android-transformer:1.1.1'
-    provided 'com.mobandme:android-transformer-compiler:1.1.1'
+    compile 'com.mobandme:android-transformer:1.2'
+    provided 'com.mobandme:android-transformer-compiler:1.2'
 }
 ```
 
