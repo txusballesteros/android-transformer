@@ -14,8 +14,8 @@ Add the library dependency to your build.gradle file.
 ```java
 dependencies {
     ...
-    compile 'com.mobandme:android-transformer:1.1.1'
-    provided 'com.mobandme:android-transformer-compiler:1.1.1'
+    compile 'com.mobandme:android-transformer:1.2'
+    provided 'com.mobandme:android-transformer-compiler:1.2'
 }
 ```
 
@@ -43,6 +43,7 @@ class HomeModel {
     @Mapped ( toField = "PostalCode")
     public String CityCode;
     ...
+
 }
 ```
 
@@ -53,6 +54,7 @@ class Home {
     
     public String PostalCode;
     ...
+
 }
 ```
 And now you will can make your object conversion.
@@ -135,7 +137,8 @@ public class HomeModel {
     )
     @Mapped public Calendar Date;
     
-    ..
+    ...
+    
 }
 ```
 

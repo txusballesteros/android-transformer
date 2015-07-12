@@ -22,37 +22,18 @@
  *
  * Contact: Txus Ballesteros <txus.ballesteros@gmail.com>
  */
-package com.mobandme.sample.app.model;
+package com.mobandme.sample.app;
 
-import com.mobandme.android.transformer.compiler.Mappable;
-import com.mobandme.android.transformer.compiler.Mapped;
-import com.mobandme.sample.app.domain.HomeColor;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-@Mappable( with = HomeColor.class)
-public class HomeColorModel {
-    @Mapped private String colorName;
-    @Mapped private String colorHex;
-
-    public String getColorName() {
-        return colorName;
+@RunWith(JUnit4.class)
+public abstract class BaseTest {
+    @Before
+    public void before() {
+        setup();
     }
 
-    public void setColorName(String colorName) {
-        this.colorName = colorName;
-    }
-
-    public String getColorHex() {
-        return colorHex;
-    }
-
-    public void setColorHex(String colorHex) {
-        this.colorHex = colorHex;
-    }
-
-    @Override public String toString() {
-        return "HomeColorModel{" +
-                "colorName='" + colorName + '\'' +
-                ", colorHex='" + colorHex + '\'' +
-                '}';
-    }
+    public abstract void setup();
 }

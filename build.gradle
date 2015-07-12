@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.0.0'
+        classpath 'com.android.tools.build:gradle:1.2.3'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.0'
         classpath 'com.github.dcendents:android-maven-plugin:1.2'
     }
@@ -12,7 +12,7 @@ buildscript {
 allprojects {
     allprojects {
         ext {
-            libraryVersion = '1.1.1'
+            libraryVersion = '1.2'
             mavenGroupId = 'com.mobandme'   // Maven Group ID for the artifact
             siteUrl = 'https://github.com/txusballesteros/android-transformer'
             gitUrl = 'https://github.com/txusballesteros/android-transformer.git'

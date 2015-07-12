@@ -32,4 +32,16 @@ public class Home {
     public String Country;
     public String Date;
     public HomeColor HomeColor;
+
+    @Override
+    public String toString() {
+        return "Home{" +
+                "PostalAddress='" + PostalAddress + '\'' +
+                ", City='" + City + '\'' +
+                ", PostalCode='" + PostalCode + '\'' +
+                ", Country='" + Country + '\'' +
+                ", Date='" + Date + '\'' +
+                ", HomeColor=" + HomeColor +
+                '}';
+    }
 }
