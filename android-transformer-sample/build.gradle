@@ -29,4 +29,5 @@ dependencies {
     provided project(':android-transformer-compiler')
     compile project(':android-transformer-sample-domain')
     compile project(':android-transformer-sample-data')
+    testCompile 'junit:junit:4.12'
 }
