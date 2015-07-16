@@ -58,7 +58,6 @@ public class HomeModelTest extends BaseTest {
         final Transformer transformer = new Transformer
                                                 .Builder()
                                                 .build(HomeModel.class);
-
         assertNotNull(transformer);
     }
 

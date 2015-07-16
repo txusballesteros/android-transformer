@@ -2,7 +2,7 @@
 
 ![Logo](assets/logo.png)
 
-Android Transformer It's Java library to manage your object transformations between your POJO objects.
+Android Transformer It's a Java library to manage your object transformations between your POJO objects.
 
 ## Version
 
