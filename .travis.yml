@@ -15,8 +15,8 @@ android:
     - $ANDROID_TARGET
 
     # Additional components
-    - extra-google-google_play_services
-    - extra-google-m2repository
-    - extra-android-m2repository
+    #- extra-google-google_play_services
+    #- extra-google-m2repository
+    #- extra-android-m2repository
 
 script: gradle build -x lint
