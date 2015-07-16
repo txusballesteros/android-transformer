@@ -6,7 +6,7 @@ Android Transformer It's a Java library to manage your object transformations be
 
 ## Version
 
-[ ![Download](https://api.bintray.com/packages/txusballesteros/maven/android-transformer/images/download.svg) ](https://bintray.com/txusballesteros/maven/android-transformer/_latestVersion) [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Android%20Transformer-brightgreen.svg?style=flat)](https://android-arsenal.com/details/1/1455)
+[![Download](https://api.bintray.com/packages/txusballesteros/maven/android-transformer/images/download.svg) ](https://bintray.com/txusballesteros/maven/android-transformer/_latestVersion) [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Android%20Transformer-brightgreen.svg?style=flat)](https://android-arsenal.com/details/1/1455) ![](https://travis-ci.org/txusballesteros/android-transformer.svg?branch=master)
 
 ## How to use
 
