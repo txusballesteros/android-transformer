@@ -70,11 +70,14 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
     RoundEnvironment roundEnvironment;
     Map<String, MapperInfo> mappersList;
+    Map<String, List<ClassInfo>> classToSubclassesInfo;
+
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         roundEnvironment = roundEnv;
         mappersList = new HashMap<>();
+        classToSubclassesInfo = new HashMap<>();
 
         processMappableAnnotationElements();
         processMappedAnnotationElements();
@@ -138,36 +141,36 @@ public class AnnotationsProcessor extends AbstractProcessor {
         }
     }
 
-    private String getMapperCompositePattern(MapperFieldInfo mapperField){
+    private String getMapperCompositePattern(MapperFieldInfo mapperField) {
         String result;
 
-        if (mapperField.isPublicField){
+        if (mapperField.isPublicField) {
             result = Tools.MAPPER_FIELD_COMPOSITE_PATTERN;
-        }else {
+        } else {
             result = Tools.MAPPER_STANDARD_FIELD_COMPOSITE_PATTERN;
         }
 
         return result;
     }
 
-    private String getMapperFieldWithParserPattern(MapperFieldInfo mapperField){
+    private String getMapperFieldWithParserPattern(MapperFieldInfo mapperField) {
         String result;
 
-        if (mapperField.isPublicField){
+        if (mapperField.isPublicField) {
             result = Tools.MAPPER_FIELD_WITH_PARSER_PATTERN;
-        }else {
+        } else {
             result = Tools.MAPPER_STANDARD_FIELD_WITH_PARSER_PATTERN;
         }
 
         return result;
     }
 
-    private String getMapperFieldPattern(MapperFieldInfo mapperField){
+    private String getMapperFieldPattern(MapperFieldInfo mapperField) {
         String result;
 
-        if (mapperField.isPublicField){
+        if (mapperField.isPublicField) {
             result = Tools.MAPPER_FIELD_PATTERN;
-        }else {
+        } else {
             result = Tools.MAPPER_STANDARD_FIELD_PATTERN;
         }
 
@@ -187,27 +190,27 @@ public class AnnotationsProcessor extends AbstractProcessor {
         return className.substring(0, 1).toLowerCase().concat(className.substring(1));
     }
 
-    private String toUpperCamelCase(String fielName){
+    private String toUpperCamelCase(String fielName) {
         return fielName.substring(0, 1).toUpperCase().concat(fielName.substring(1));
     }
 
-    private String returnedFieldPrefix(MapperFieldInfo mapperField, String fieldName){
+    private String returnedFieldPrefix(MapperFieldInfo mapperField, String fieldName) {
         if (mapperField.isPublicField)
             return fieldName;
 
         return returnedFieldPrefix(mapperField.fieldType, fieldName);
     }
 
-    private String returnedFieldPrefix(String fieldType, String fieldName){
+    private String returnedFieldPrefix(String fieldType, String fieldName) {
         String result;
 
-        if (fieldType.equals("boolean")){
-            if (fieldName.toLowerCase().startsWith(BOOLEAN_FIELD_PREFIX)){
+        if (fieldType.equals("boolean")) {
+            if (fieldName.toLowerCase().startsWith(BOOLEAN_FIELD_PREFIX)) {
                 result = toLowerCamelCase(fieldName);
-            }else{
+            } else {
                 result = BOOLEAN_FIELD_PREFIX.concat(fieldName);
             }
-        }else{
+        } else {
             result = SOME_FIELD_PREFIX.concat(fieldName);
         }
 
@@ -271,7 +274,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
         buffer.append(String.format("\t\t\tresult = new %s();", linkedClassName));
         buffer.newLine();
 
-        for(String field : fields) {
+        for (String field : fields) {
             buffer.newLine();
             buffer.append(String.format("\t\t\t%s", field));
         }
@@ -287,7 +290,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
     private void generateTransformersJavaFiles() {
         Map<String, TransformerInfo> transformersList = new HashMap<>();
-        
+
         if (mappersList.size() > 0) {
             for (MapperInfo mapper : mappersList.values()) {
                 if (!transformersList.containsKey(mapper.packageName)) {
@@ -296,15 +299,15 @@ public class AnnotationsProcessor extends AbstractProcessor {
                     TransformerInfo transformer = new TransformerInfo(packageName, className);
                     transformersList.put(mapper.packageName, transformer);
                 }
-                
+
                 TransformerInfo transformer = transformersList.get(mapper.packageName);
                 transformer.getMappers().add(mapper);
             }
-            
+
             generateTransformerJavaFile(transformersList);
         }
     }
-    
+
     private void generateTransformerJavaFile(Map<String, TransformerInfo> transformers) {
         try {
 
@@ -378,11 +381,13 @@ public class AnnotationsProcessor extends AbstractProcessor {
     }
 
     private void processMappableAnnotationElements() {
-        for (Element mappableElement : roundEnvironment.getElementsAnnotatedWith(Mappable.class)) {
+        Set<? extends Element> mappableElements = roundEnvironment.getElementsAnnotatedWith(Mappable.class);
+
+        for (Element mappableElement : mappableElements) {
             if (mappableElement.getKind() == ElementKind.CLASS) {
 
                 AnnotationMirror mappableAnnotationMirror = getAnnotationMirror(mappableElement, Mappable.class);
-                AnnotationValue  annotationValue = getAnnotationValue(mappableAnnotationMirror, "with");
+                AnnotationValue annotationValue = getAnnotationValue(mappableAnnotationMirror, "with");
                 TypeElement linkedElement = getTypeElement(annotationValue);
 
                 ClassInfo mappableClassInfo = extractClassInformation(mappableElement);
@@ -390,6 +395,32 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
                 if (!haveMapper(mappableClassInfo))
                     createMapper(mappableElement.asType().toString(), mappableClassInfo, linkedClassInfo);
+
+                findSubclasses(mappableElement, mappableElements);
+            }
+        }
+
+    }
+
+    private void findSubclasses(Element classElement, Set<? extends Element> allElements) {
+
+        for (Element possibleSubclassElement : allElements) {
+
+            boolean isSubclass =
+                    processingEnv.getTypeUtils().isAssignable(possibleSubclassElement.asType(), classElement.asType())
+                            && !possibleSubclassElement.equals(classElement);
+
+
+            ClassInfo classInfo = extractClassInformation(classElement);
+
+            List<ClassInfo> subclassesInfo = classToSubclassesInfo.get(classInfo.getFullName());
+            if (subclassesInfo == null) {
+                subclassesInfo = new ArrayList<>();
+                classToSubclassesInfo.put(classInfo.getFullName(), subclassesInfo);
+            }
+
+            if (isSubclass) {
+                subclassesInfo.add(extractClassInformation(possibleSubclassElement));
             }
         }
     }
@@ -407,9 +438,24 @@ public class AnnotationsProcessor extends AbstractProcessor {
                 MapperFieldInfo mappingFieldInfo = new MapperFieldInfo(fieldName, fieldType, toFieldName, isPublicField);
 
                 ClassInfo classInfo = extractClassInformationFromField(mappedElement);
+
                 getMapper(classInfo)
-                            .getFields()
-                                .add(mappingFieldInfo);
+                        .getFields()
+                        .add(mappingFieldInfo);
+
+                addFieldToSubclassesMappers(classInfo, mappingFieldInfo);
+            }
+        }
+    }
+
+    private void addFieldToSubclassesMappers(ClassInfo classInfo, MapperFieldInfo mappingFieldInfo) {
+        for (ClassInfo subClassInfo : classToSubclassesInfo.get(classInfo.getFullName())) {
+            MapperInfo subClassMapper = getMapper(subClassInfo);
+
+            if (subClassMapper != null) {
+                subClassMapper
+                        .getFields()
+                        .add(mappingFieldInfo);
             }
         }
     }
@@ -419,8 +465,8 @@ public class AnnotationsProcessor extends AbstractProcessor {
             if (parseElement.getKind() == ElementKind.FIELD) {
 
                 AnnotationMirror parseAnnotationMirror = getAnnotationMirror(parseElement, Parse.class);
-                AnnotationValue  originToDestinationWithValue = getAnnotationValue(parseAnnotationMirror, "originToDestinationWith");
-                AnnotationValue  destinationToOriginWithValue = getAnnotationValue(parseAnnotationMirror, "destinationToOriginWith");
+                AnnotationValue originToDestinationWithValue = getAnnotationValue(parseAnnotationMirror, "originToDestinationWith");
+                AnnotationValue destinationToOriginWithValue = getAnnotationValue(parseAnnotationMirror, "destinationToOriginWith");
                 TypeElement originToDestinationValue = getTypeElement(originToDestinationWithValue);
                 TypeElement destinationToOriginValue = getTypeElement(destinationToOriginWithValue);
 
@@ -429,16 +475,36 @@ public class AnnotationsProcessor extends AbstractProcessor {
                 ClassInfo originToDestinationParserClass = extractClassInformation(originToDestinationValue);
                 ClassInfo destinationToOriginParserClass = extractClassInformation(destinationToOriginValue);
 
-                MapperFieldInfo mapperField = getMapper(ownerClass).getField(fieldName);
-                if (mapperField != null) {
-                    mapperField.originToDestinationParserPackageName = originToDestinationParserClass.packageName;
-                    mapperField.originToDestinationParserClassName = originToDestinationParserClass.className;
-                    mapperField.destinationToOriginParserPackageName = destinationToOriginParserClass.packageName;
-                    mapperField.destinationToOriginParserClassName = destinationToOriginParserClass.className;
-                } else {
-                    writeError(String.format("You have configured a @Parse annotation without a @Mapped annotation on %s.%s.", ownerClass.getFullName(), fieldName));
-                }
+                addParsersToMapperField(fieldName, ownerClass, originToDestinationParserClass, destinationToOriginParserClass);
+                writeTrace("addParsersToMapperField : " + fieldName + " - " + ownerClass + " - " + originToDestinationParserClass + " - " + destinationToOriginParserClass);
+
+                addParsersToSubclassesMapperFields(fieldName, ownerClass, originToDestinationParserClass, destinationToOriginParserClass);
             }
+        }
+    }
+
+    private void addParsersToMapperField(String fieldName,
+                                         ClassInfo ownerClass,
+                                         ClassInfo originToDestinationParserClass,
+                                         ClassInfo destinationToOriginParserClass) {
+        MapperFieldInfo mapperField = getMapper(ownerClass).getField(fieldName);
+        if (mapperField != null) {
+            mapperField.originToDestinationParserPackageName = originToDestinationParserClass.packageName;
+            mapperField.originToDestinationParserClassName = originToDestinationParserClass.className;
+            mapperField.destinationToOriginParserPackageName = destinationToOriginParserClass.packageName;
+            mapperField.destinationToOriginParserClassName = destinationToOriginParserClass.className;
+        } else {
+            writeError(String.format("You have configured a @Parse annotation without a @Mapped annotation on %s.%s.", ownerClass.getFullName(), fieldName));
+        }
+    }
+
+    private void addParsersToSubclassesMapperFields(String fieldName,
+                                                    ClassInfo superClass,
+                                                    ClassInfo originToDestinationParserClass,
+                                                    ClassInfo destinationToOriginParserClass) {
+        for (ClassInfo ownerClass : classToSubclassesInfo.get(superClass.getFullName())) {
+            addParsersToMapperField(fieldName, ownerClass, originToDestinationParserClass, destinationToOriginParserClass);
+            writeTrace("addParsersToMapperField(subclass) : " + fieldName + " - " + ownerClass + " - " + originToDestinationParserClass + " - " + destinationToOriginParserClass);
         }
     }
 
@@ -463,7 +529,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
     }
 
     private ClassInfo extractClassInformation(Element element) {
-        PackageElement packageElement = (PackageElement)element.getEnclosingElement();
+        PackageElement packageElement = (PackageElement) element.getEnclosingElement();
         String className = element.getSimpleName().toString();
         String packageName = packageElement.getQualifiedName().toString();
 
@@ -474,13 +540,13 @@ public class AnnotationsProcessor extends AbstractProcessor {
         AnnotationMirror result = null;
 
         String annotationClassName = annotationType.getName();
-        for(AnnotationMirror mirror : element.getAnnotationMirrors()) {
-            if(mirror.getAnnotationType().toString().equals(annotationClassName)) {
+        for (AnnotationMirror mirror : element.getAnnotationMirrors()) {
+            if (mirror.getAnnotationType().toString().equals(annotationClassName)) {
                 result = mirror;
                 break;
             }
         }
-        
+
         return result;
     }
 
@@ -492,7 +558,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
                 }
             }
         }
-        
+
         return null;
     }
 
@@ -500,9 +566,9 @@ public class AnnotationsProcessor extends AbstractProcessor {
         TypeElement result = null;
 
         if (value != null) {
-            TypeMirror typeMirror = (TypeMirror)value.getValue();
+            TypeMirror typeMirror = (TypeMirror) value.getValue();
             Types TypeUtils = processingEnv.getTypeUtils();
-            result = (TypeElement)TypeUtils.asElement(typeMirror);
+            result = (TypeElement) TypeUtils.asElement(typeMirror);
         }
 
         return result;
@@ -511,7 +577,7 @@ public class AnnotationsProcessor extends AbstractProcessor {
     private void writeError(String message) {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message);
     }
-    
+
     private void writeTrace(String message) {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, message);
     }
@@ -537,17 +603,17 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
     private class TransformerInfo extends ClassInfo {
         private List<MapperInfo> mappers;
-       
+
         public List<MapperInfo> getMappers() {
-            return mappers;     
+            return mappers;
         }
-        
+
         public TransformerInfo(String packageName, String className) {
             super(packageName, className);
             mappers = new ArrayList<>();
         }
     }
-    
+
     private class MapperInfo extends ClassInfo {
         public final String mapperClassName;
         public final String mapperPackageName;
@@ -557,19 +623,21 @@ public class AnnotationsProcessor extends AbstractProcessor {
 
         private List<MapperFieldInfo> mappedFieldsList = new ArrayList<>();
 
-        public List<MapperFieldInfo> getFields() { return mappedFieldsList; }
+        public List<MapperFieldInfo> getFields() {
+            return mappedFieldsList;
+        }
 
         public MapperFieldInfo getField(String fieldName) {
             MapperFieldInfo result = null;
             for (MapperFieldInfo field : mappedFieldsList) {
-                if (field.fieldName.equals(fieldName)){
+                if (field.fieldName.equals(fieldName)) {
                     result = field;
                     break;
                 }
             }
             return result;
         }
-        
+
         public MapperInfo(String mappableClassName, String packageName, String className, String linkedPackageName, String linkedClassName) {
             super(packageName, className);
 
